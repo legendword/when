@@ -16,8 +16,8 @@
                     </div>
                 </div>
                 <div class="q-mb-md q-gutter-md row items-start">
-                    <q-date :value="value" @input="valueChange" :mask="mask" color="primary" />
-                    <q-time v-if="!dateOnly" :value="value" @input="valueChange" :mask="mask" color="primary" />
+                    <q-date :value="value" @input="valueChange" :mask="mask" color="primary" today-btn />
+                    <q-time v-if="!dateOnly" :value="value" @input="valueChange" :mask="mask" color="primary" now-btn />
                 </div>
             </div>
         </q-slide-transition>

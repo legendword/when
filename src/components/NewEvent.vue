@@ -5,13 +5,14 @@
             <div class="q-mb-lg">
                 <q-input v-model="title" label="Title" ref="title" input-class="text-input" />
             </div>
-            <div class="q-mb-md">
-                <q-toggle v-model="fullDay" label="Full Day Event" :class="fullDay ? 'toggle-active' : 'toggle-inactive'" />
+            <div class="q-mb-md row q-gutter-md">
+                <q-toggle v-model="isTodo" label="Todo" :class="isTodo ? 'toggle-active' : 'toggle-inactive'" />
+                <q-toggle v-model="fullDay" label="Full Day" :class="fullDay ? 'toggle-active' : 'toggle-inactive'" />
             </div>
             <div class="q-mb-md">
-                <date-time-input v-model="dateFrom" label="From" :date-only="fullDay" @focus="dateFocus('dateFrom')" @blur="inFocus.dateFrom = false" ref="dateFrom" />
+                <date-time-input v-model="dateFrom" :label="isTodo ? 'Date' : 'From'" :date-only="fullDay" @focus="dateFocus('dateFrom')" @blur="inFocus.dateFrom = false" ref="dateFrom" />
             </div>
-            <div class="q-mb-md">
+            <div class="q-mb-md" v-show="!isTodo">
                 <date-time-input v-model="dateTo" label="To" :date-only="fullDay" @focus="dateFocus('dateTo')" @blur="inFocus.dateTo = false" ref="dateTo" />
             </div>
             <div class="q-mb-md">
@@ -22,7 +23,7 @@
                 </q-input>
             </div>
             <div class="q-my-lg">
-                <q-btn color="primary" unelevated label="Add Event" class="full-width" />
+                <q-btn color="primary" unelevated label="Add Event" class="full-width" @click="submit" />
             </div>
         </div>
     </div>
@@ -30,6 +31,7 @@
 
 <script>
 import DateTimeInput from '../components/DateTimeInput.vue'
+import listUtil from '../util/list'
 export default {
     name: 'NewEvent',
     props: {
@@ -41,6 +43,7 @@ export default {
     data() {
         return {
             title: '',
+            isTodo: true,
             fullDay: false,
             dateFrom: null,
             dateTo: null,
@@ -77,6 +80,19 @@ export default {
                     this.$refs[i].toggleActive()
                 }
             }
+        },
+        submit() {
+            let event = {};
+            for (let i of ['title', 'isTodo', 'fullDay', 'dateFrom', 'dateTo', 'notes']) {
+                event[i] = this[i]
+            }
+            listUtil.addEvent(event).then(() => {
+                console.log('addEvent success')
+                this.$store.commit('data/newEvent', true)
+                this.$emit('close')
+            }).catch(err => {
+                console.error('addEvent error: ', err)
+            })
         }
     }
 }

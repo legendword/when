@@ -16,7 +16,7 @@
         </q-drawer>
 
         <q-drawer v-model="drawer" side="right" overlay elevated behavior="mobile" :width="drawerWidth">
-            <new-event :show="drawer" />
+            <new-event :show="drawer" @close="drawer = false" />
         </q-drawer>
 
         <q-page-container>
@@ -55,7 +55,7 @@ export default {
             }
         },
         drawerWidth() {
-            return this.$q.screen.width * 0.7;
+            return this.$q.screen.width * 0.8;
         }
     }
 }
