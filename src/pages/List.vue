@@ -13,9 +13,9 @@
                     </q-item-section>
                 </q-item>
                 
-                <q-item clickable draggable v-for="(item, index) in unassigned" :key="index">
+                <q-item clickable draggable v-for="item in unassigned" :key="item.index">
                     <q-item-section side top>
-                        <q-checkbox v-model="checked[index]" v-if="item.isTodo" />
+                        <q-checkbox v-model="checked[item.index]" v-if="item.isTodo" />
                         <div class="checkbox-placeholder" v-else>
 
                         </div>
@@ -39,9 +39,9 @@
                     </q-item-section>
                 </q-item>
                 
-                <q-item clickable draggable v-for="(item, index) in pastDue" :key="index">
+                <q-item clickable draggable v-for="item in pastDue" :key="item.index">
                     <q-item-section side top>
-                        <q-checkbox v-model="checked[index]" v-if="item.isTodo" />
+                        <q-checkbox v-model="checked[item.index]" v-if="item.isTodo" />
                         <div class="checkbox-placeholder" v-else>
 
                         </div>
@@ -66,9 +66,9 @@
                     </q-item-section>
                 </q-item>
 
-                <q-item clickable draggable v-for="(item, index) in day.events" :key="index">
+                <q-item clickable draggable v-for="item in day.events" :key="item.index">
                     <q-item-section side top>
-                        <q-checkbox v-model="checked[index]" v-if="item.isTodo" />
+                        <q-checkbox v-model="checked[item.index]" v-if="item.isTodo" />
                         <div class="checkbox-placeholder" v-else>
 
                         </div>
@@ -103,9 +103,9 @@
                     </q-item-section>
                 </q-item>
 
-                <q-item clickable draggable v-for="(item, index) in day.events" :key="index">
+                <q-item clickable draggable v-for="item in day.events" :key="item.index">
                     <q-item-section side top>
-                        <q-checkbox v-model="checked[index]" v-if="item.isTodo" />
+                        <q-checkbox v-model="checked[item.index]" v-if="item.isTodo" />
                         <div class="checkbox-placeholder" v-else>
 
                         </div>
@@ -154,6 +154,7 @@ export default {
             this.pastDue = []
             this.closeDays = []
             this.days = []
+            let index = 0
             let d = moment()
             const dateNames = ['Today', 'Tomorrow']
             for (let i=0;i<7;i++) {
@@ -165,6 +166,7 @@ export default {
                 d = d.add(1, 'd')
             }
             for (let i of this.list) {
+                i.index = index++
                 if (i.date == 'null') {
                     this.unassigned.push(i)
                 }
