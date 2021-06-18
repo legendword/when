@@ -13,18 +13,7 @@
                     </q-item-section>
                 </q-item>
                 
-                <q-item clickable draggable v-for="item in unassigned" :key="item.index">
-                    <q-item-section side top>
-                        <q-checkbox v-model="checked[item.index]" v-if="item.isTodo" />
-                        <div class="checkbox-placeholder" v-else>
-
-                        </div>
-                    </q-item-section>
-                    <q-item-section>
-                        <div class="list-title">{{ item.title }}</div>
-                        <div class="list-notes">{{ item.notes }}</div>
-                    </q-item-section>
-                </q-item>
+                <list-event v-for="item in unassigned" :key="item.index" :item="item" />
             </div>
 
             <div v-if="pastDue.length > 0">
@@ -39,18 +28,7 @@
                     </q-item-section>
                 </q-item>
                 
-                <q-item clickable draggable v-for="item in pastDue" :key="item.index">
-                    <q-item-section side top>
-                        <q-checkbox v-model="checked[item.index]" v-if="item.isTodo" />
-                        <div class="checkbox-placeholder" v-else>
-
-                        </div>
-                    </q-item-section>
-                    <q-item-section>
-                        <div class="list-title">{{ item.title }}</div>
-                        <div class="list-notes">{{ item.notes }}</div>
-                    </q-item-section>
-                </q-item>
+                <list-event v-for="item in pastDue" :key="item.index" :item="item" />
             </div>
 
             <div v-for="day in closeDays" :key="day.date">
@@ -66,18 +44,7 @@
                     </q-item-section>
                 </q-item>
 
-                <q-item clickable draggable v-for="item in day.events" :key="item.index">
-                    <q-item-section side top>
-                        <q-checkbox v-model="checked[item.index]" v-if="item.isTodo" />
-                        <div class="checkbox-placeholder" v-else>
-
-                        </div>
-                    </q-item-section>
-                    <q-item-section>
-                        <div class="list-title">{{ item.title }}</div>
-                        <div class="list-notes">{{ item.notes }}</div>
-                    </q-item-section>
-                </q-item>
+                <list-event v-for="item in day.events" :key="item.index" :item="item" />
 
                 <q-item v-if="day.events.length == 0">
                     <q-item-section side>
@@ -103,18 +70,7 @@
                     </q-item-section>
                 </q-item>
 
-                <q-item clickable draggable v-for="item in day.events" :key="item.index">
-                    <q-item-section side top>
-                        <q-checkbox v-model="checked[item.index]" v-if="item.isTodo" />
-                        <div class="checkbox-placeholder" v-else>
-
-                        </div>
-                    </q-item-section>
-                    <q-item-section>
-                        <div class="list-title">{{ item.title }}</div>
-                        <div class="list-notes">{{ item.notes }}</div>
-                    </q-item-section>
-                </q-item>
+                <list-event v-for="item in day.events" :key="item.index" :item="item" />
             </div>
         </q-list>
         <q-page-sticky position="bottom-right" :offset="[25, 25]">
@@ -124,16 +80,18 @@
 </template>
 
 <script>
+import ListEvent from '../components/ListEvent.vue'
 import listUtil from 'src/util/list'
 import moment from 'moment'
 import { datecmp, formatDate, humanDate, todayStr, tomorrowStr } from 'src/util/date'
 //import { mapState } from 'vuex'
 export default {
     name: 'List',
+    components: {
+        ListEvent
+    },
     data() {
         return {
-            check: false,
-            checked: [],
             list: [],
             unassigned: [],
             pastDue: [],
@@ -199,7 +157,6 @@ export default {
         loadList() {
             listUtil.getAllEvents().then(res => {
                 this.list = res
-                this.checked = this.list.map(v => false)
                 console.log('getAllEvents success')
                 this.sortList()
             }).catch(err => {
