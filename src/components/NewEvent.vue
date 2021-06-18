@@ -42,9 +42,10 @@ export default {
     },
     data() {
         return {
+            //defaults should be in sync with clear()
             title: '',
             isTodo: true,
-            fullDay: false,
+            fullDay: true,
             dateFrom: null,
             dateTo: null,
             notes: '',
@@ -59,6 +60,11 @@ export default {
         show(val) {
             if (val) {
                 this.$refs.title.focus()
+            }
+        },
+        isTodo(val) {
+            if (!val && this.fullDay) {
+                this.fullDay = false
             }
         }
     },
@@ -90,9 +96,27 @@ export default {
                 console.log('addEvent success')
                 this.$store.commit('data/newEvent', true)
                 this.$emit('close')
+                this.clear()
             }).catch(err => {
                 console.error('addEvent error: ', err)
             })
+        },
+        clear() {
+            //reset to default
+            this.title = ''
+            this.isTodo = true
+            this.fullDay = true
+            this.dateFrom = null
+            this.dateTo = null
+            this.notes = ''
+            for (let i of ['dateFrom', 'dateTo']) {
+                if (this.inFocus[i]) {
+                    this.$refs[i].toggleActive()
+                }
+            }
+            for (let i in this.inFocus) {
+                this.inFocus[i] = false
+            }
         }
     }
 }

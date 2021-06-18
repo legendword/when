@@ -1,48 +1,30 @@
 <template>
-    <q-page>
+    <q-page class="q-px-md q-pb-lg">
         <q-list>
             <div v-if="unassigned.length > 0">
-                <q-item>
-                    <q-item-section side>
-                        <div class="checkbox-placeholder">
-
-                        </div>
-                    </q-item-section>
-                    <q-item-section>
-                        <div class="text-h4 q-mt-lg q-mb-sm text-brown-8">Unassigned</div>
-                    </q-item-section>
-                </q-item>
+                <list-header color="brown-8">
+                    Unassigned
+                </list-header>
                 
                 <list-event v-for="item in unassigned" :key="item.index" :item="item" />
             </div>
 
             <div v-if="pastDue.length > 0">
-                <q-item>
-                    <q-item-section side>
-                        <div class="checkbox-placeholder">
-
-                        </div>
-                    </q-item-section>
-                    <q-item-section>
-                        <div class="text-h4 q-mt-lg q-mb-sm text-negative">Past Due</div>
-                    </q-item-section>
-                </q-item>
+                <list-header color="negative">
+                    Past Due
+                </list-header>
                 
                 <list-event v-for="item in pastDue" :key="item.index" :item="item" />
             </div>
 
             <div v-for="day in closeDays" :key="day.date">
-                <q-item>
-                    <q-item-section side>
-                        <div class="checkbox-placeholder">
+                <list-header :color="day.displayDate == 'Today' ? 'orange-8' : 'light-green-8'">
+                    {{ day.displayDate }}
 
-                        </div>
-                    </q-item-section>
-                    <q-item-section>
-                        <div class="text-h4 q-mt-lg q-mb-sm text-orange-8" v-if="day.displayDate == 'Today'">Today</div>
-                        <div class="text-h4 q-mt-lg q-mb-sm text-light-green-8" v-else>{{ day.displayDate }}</div>
-                    </q-item-section>
-                </q-item>
+                    <template v-slot:side>
+                        {{ day.date.substr(8, 2) }}
+                    </template>
+                </list-header>
 
                 <list-event v-for="item in day.events" :key="item.index" :item="item" />
 
@@ -59,16 +41,9 @@
             </div>
 
             <div v-for="day in days" :key="day.date">
-                <q-item>
-                    <q-item-section side>
-                        <div class="checkbox-placeholder">
-
-                        </div>
-                    </q-item-section>
-                    <q-item-section>
-                        <div class="text-h4 q-mt-lg q-mb-sm text-light-green-8">{{ humanDate(day.date) }}</div>
-                    </q-item-section>
-                </q-item>
+                <list-header color="light-green-8">
+                    {{ humanDate(day.date) }}
+                </list-header>
 
                 <list-event v-for="item in day.events" :key="item.index" :item="item" />
             </div>
@@ -81,6 +56,7 @@
 
 <script>
 import ListEvent from '../components/ListEvent.vue'
+import ListHeader from '../components/ListHeader.vue'
 import listUtil from 'src/util/list'
 import moment from 'moment'
 import { datecmp, formatDate, humanDate, todayStr, tomorrowStr } from 'src/util/date'
@@ -88,7 +64,8 @@ import { datecmp, formatDate, humanDate, todayStr, tomorrowStr } from 'src/util/
 export default {
     name: 'List',
     components: {
-        ListEvent
+        ListEvent,
+        ListHeader
     },
     data() {
         return {
@@ -129,6 +106,7 @@ export default {
                     this.unassigned.push(i)
                 }
                 else if (datecmp(i.date, this.today) < 0) {
+                    if (!i.isTodo) continue //none-todo events are never pastDue
                     this.pastDue.push(i)
                 }
                 else {

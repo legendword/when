@@ -1,9 +1,9 @@
 <template>
-    <q-item clickable draggable>
+    <q-item draggable dense class="q-my-sm list-event">
         <q-item-section side top>
             <q-checkbox v-model="checked" v-if="item.isTodo" />
-            <div class="checkbox-placeholder" v-else>
-
+            <div class="checkbox-placeholder flex items-center justify-center" v-else>
+                <q-icon name="event" size="sm" />
             </div>
         </q-item-section>
         <q-item-section>
@@ -31,6 +31,15 @@ export default {
 </script>
 
 <style lang="scss">
+.list-event {
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-color 300ms ease;
+
+    &:hover {
+        background-color: $grey-3;
+    }
+}
 .checkbox-placeholder {
     width: 40px; /* smaller than 40px to allow text to be a bit to the left */
     height: 40px;
