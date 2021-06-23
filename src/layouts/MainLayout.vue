@@ -42,7 +42,8 @@ export default {
     },
     data () {
         return {
-            menu: true
+            menu: true,
+            pageHiddenProp: 'hidden'
         }
     },
     computed: {
@@ -57,6 +58,33 @@ export default {
         drawerWidth() {
             return this.$q.screen.width * 0.8;
         }
+    },
+    methods: {
+        applyListener() {
+            var hidden, visibilityChange;
+            if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
+                hidden = "hidden";
+                visibilityChange = "visibilitychange";
+            } else if (typeof document.msHidden !== "undefined") {
+                hidden = "msHidden";
+                visibilityChange = "msvisibilitychange";
+            } else if (typeof document.webkitHidden !== "undefined") {
+                hidden = "webkitHidden";
+                visibilityChange = "webkitvisibilitychange";
+            }
+            else {
+                return
+            }
+            this.pageHiddenProp = hidden
+            document.addEventListener(visibilityChange, this.handlePageVisibilityChange, false)
+        },
+        handlePageVisibilityChange() {
+            this.$store.commit('layout/pageVisibilityChange', !document[this.pageHiddenProp])
+        }
+    },
+    mounted() {
+        //apply listener for page visibility change
+        this.applyListener()
     }
 }
 </script>

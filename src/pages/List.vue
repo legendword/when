@@ -6,7 +6,7 @@
                     Unassigned
                 </list-header>
                 
-                <list-event v-for="item in unassigned" :key="item.index" :item="item" />
+                <list-event v-for="item in unassigned" :key="item.id" :item="item" @remove="removeEvent(item)" @assign="assignEvent(item, $event)" />
             </div>
 
             <div v-if="pastDue.length > 0">
@@ -14,7 +14,7 @@
                     Past Due
                 </list-header>
                 
-                <list-event v-for="item in pastDue" :key="item.index" :item="item" />
+                <list-event v-for="item in pastDue" :key="item.id" :item="item" @remove="removeEvent(item)" @assign="assignEvent(item, $event)" />
             </div>
 
             <div v-for="day in closeDays" :key="day.date">
@@ -26,7 +26,7 @@
                     </template>
                 </list-header>
 
-                <list-event v-for="item in day.events" :key="item.index" :item="item" />
+                <list-event v-for="item in day.events" :key="item.id" :item="item" isAssigned :isToday="day.displayDate == 'Today'" @remove="removeEvent(item)" @move="moveEvent(item, $event)" />
 
                 <q-item v-if="day.events.length == 0">
                     <q-item-section side>
@@ -45,7 +45,7 @@
                     {{ humanDate(day.date) }}
                 </list-header>
 
-                <list-event v-for="item in day.events" :key="item.index" :item="item" />
+                <list-event v-for="item in day.events" :key="item.id" :item="item" isAssigned @remove="removeEvent(item)" @move="moveEvent(item, $event)" />
             </div>
         </q-list>
         <q-page-sticky position="bottom-right" :offset="[25, 25]">
@@ -59,7 +59,7 @@ import ListEvent from '../components/ListEvent.vue'
 import ListHeader from '../components/ListHeader.vue'
 import listUtil from 'src/util/list'
 import moment from 'moment'
-import { datecmp, formatDate, humanDate, todayStr, tomorrowStr } from 'src/util/date'
+import { datecmp, offsetDate, humanDate, todayStr, tomorrowStr } from 'src/util/date'
 //import { mapState } from 'vuex'
 export default {
     name: 'List',
@@ -69,7 +69,10 @@ export default {
     },
     data() {
         return {
-            list: [],
+            list: {
+                assigned: [],
+                unassigned: []
+            },
             unassigned: [],
             pastDue: [],
             closeDays: [],
@@ -80,16 +83,39 @@ export default {
         }
     },
     methods: {
+        moveEvent(evt, dayOffset) {
+            let dest = offsetDate(evt.date, dayOffset)
+            console.log(evt, dayOffset, dest)
+            listUtil.moveEvent(evt, dest).then(() => {
+                this.loadList()
+            }).catch(err => {
+                console.log(err)
+            })
+        },
+        assignEvent(evt, day) {
+            console.log(evt, day)
+            let dt = day == 'today' ? this.today : this.tomorrow
+            listUtil.assignEvent(evt, dt).then(() => {
+                this.loadList()
+            }).catch(err => {
+                console.log(err)
+            })
+        },
+        removeEvent(evt) {
+            listUtil.deleteEvent(evt).then(() => {
+                this.loadList()
+            }).catch(err => {
+                console.error(err)
+            })
+        },
         openDrawer() {
             this.$store.commit('layout/drawerState', true)
         },
         sortList() { //sort list content into unassigned, pastDue, and days
             console.log(this.today, this.tomorrow)
-            this.unassigned = []
             this.pastDue = []
             this.closeDays = []
             this.days = []
-            let index = 0
             let d = moment()
             const dateNames = ['Today', 'Tomorrow']
             for (let i=0;i<7;i++) {
@@ -100,12 +126,12 @@ export default {
                 })
                 d = d.add(1, 'd')
             }
-            for (let i of this.list) {
-                i.index = index++
-                if (i.date == 'null') {
-                    this.unassigned.push(i)
-                }
-                else if (datecmp(i.date, this.today) < 0) {
+            this.list.unassigned.sort((a,b) => {
+                return a.order - b.order
+            })
+            this.unassigned = this.list.unassigned
+            for (let i of this.list.assigned) {
+                if (datecmp(i.date, this.today) < 0) {
                     if (!i.isTodo) continue //none-todo events are never pastDue
                     this.pastDue.push(i)
                 }
@@ -130,11 +156,23 @@ export default {
                 }
             }
             //todo or not to do: sort this.days by date
-            console.log(this.unassigned, this.pastDue, this.closeDays, this.days)
+            for (let i in this.closeDays) {
+                this.closeDays[i].events.sort((a, b) => {
+                    return a.order - b.order
+                })
+            }
+            for (let i in this.days) {
+                this.days[i].events.sort((a, b) => {
+                    return a.order - b.order
+                })
+            }
+
+            //console.log(this.unassigned, this.pastDue, this.closeDays, this.days)
         },
         loadList() {
             listUtil.getAllEvents().then(res => {
-                this.list = res
+                this.list.assigned = res.assigned
+                this.list.unassigned = res.unassigned
                 console.log('getAllEvents success')
                 this.sortList()
             }).catch(err => {
@@ -148,11 +186,21 @@ export default {
                 this.loadList()
                 this.$store.commit('data/newEvent', false)
             }
+        },
+        pageVisible(val) {
+            if (val) {
+                //either this.loadList() or this.sortList()
+                console.log('list re-render')
+                this.sortList()
+            }
         }
     },
     computed: {
         newEvent() {
             return this.$store.state.data.newEvent
+        },
+        pageVisible() {
+            return this.$store.state.layout.pageVisible
         }
     },
     created() {

@@ -10,6 +10,35 @@
             <div class="list-title">{{ item.title }}</div>
             <div class="list-notes">{{ item.notes }}</div>
         </q-item-section>
+        
+        <q-menu
+            touch-position
+            context-menu
+        >
+            <q-list dense style="min-width: 100px">
+                <template v-if="isAssigned">
+                    <q-item clickable v-close-popup :disable="isToday" @click="$emit('move', -1)">
+                        <q-item-section>Move to Previous Day</q-item-section>
+                    </q-item>
+                    <q-item clickable v-close-popup @click="$emit('move', 1)">
+                        <q-item-section>Move to Next Day</q-item-section>
+                    </q-item>
+                </template>
+                <template v-else>
+                    <q-item clickable v-close-popup @click="$emit('assign', 'today')">
+                        <q-item-section>Assign to Today</q-item-section>
+                    </q-item>
+                    <q-item clickable v-close-popup @click="$emit('assign', 'tomorrow')">
+                        <q-item-section>Assign to Tomorrow</q-item-section>
+                    </q-item>
+                </template>
+                <q-separator />
+                <q-item clickable v-close-popup @click="$emit('remove')">
+                    <q-item-section class="text-negative">Remove Event</q-item-section>
+                </q-item>
+            </q-list>
+
+        </q-menu>
     </q-item>
 </template>
 
@@ -20,6 +49,12 @@ export default {
         item: {
             type: Object,
             required: true
+        },
+        isAssigned: {
+            type: Boolean
+        },
+        isToday: {
+            type: Boolean
         }
     },
     data() {

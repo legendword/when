@@ -52,3 +52,7 @@ export const humanDate = function(date) {
    if (date == null) return moment().format('MMM D, YYYY')
    return moment(date, 'YYYY-MM-DD').format('MMM D, YYYY')
 }
+export const offsetDate = function(date, offset) {
+    //offset 'date' str by 'offset' days
+    return moment(date, 'YYYY-MM-DD').add(offset, 'd').format('YYYY-MM-DD')
+}

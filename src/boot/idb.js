@@ -7,8 +7,10 @@ export const idb = {
   data: openDB('data', 1, {
     upgrade: (db, oldVersion, newVersion, transaction) => {
       if (oldVersion <= 0) {
-        const store = db.createObjectStore('list', { autoIncrement: true })
-        store.createIndex('dateIndex', 'date')
+        const assigned = db.createObjectStore('assigned', { keyPath: 'id', autoIncrement: true })
+        assigned.createIndex('dateIndex', 'date')
+        db.createObjectStore('unassigned', { keyPath: 'id', autoIncrement: true })
+        db.createObjectStore('maxOrder')
       }
     }
   })
