@@ -33,6 +33,15 @@
                     </q-item>
                 </template>
                 <q-separator />
+                <template v-if="!noReorder">
+                    <q-item clickable v-close-popup @click="$emit('reorder', -1)">
+                        <q-item-section>Move Up</q-item-section>
+                    </q-item>
+                    <q-item clickable v-close-popup @click="$emit('reorder', 1)">
+                        <q-item-section>Move Down</q-item-section>
+                    </q-item>
+                </template>
+                <q-separator />
                 <q-item clickable v-close-popup @click="$emit('remove')">
                     <q-item-section class="text-negative">Remove Event</q-item-section>
                 </q-item>
@@ -55,6 +64,10 @@ export default {
         },
         isToday: {
             type: Boolean
+        },
+        noReorder: {
+            type: Boolean,
+            default: false
         }
     },
     data() {

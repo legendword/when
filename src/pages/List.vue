@@ -6,7 +6,7 @@
                     Unassigned
                 </list-header>
                 
-                <list-event v-for="item in unassigned" :key="item.id" :item="item" @remove="removeEvent(item)" @assign="assignEvent(item, $event)" />
+                <list-event v-for="item in unassigned" :key="item.id" :item="item" @remove="removeEvent(item)" @assign="assignEvent(item, $event)" @reorder="reOrderEvent(item, $event)" />
             </div>
 
             <div v-if="pastDue.length > 0">
@@ -14,7 +14,7 @@
                     Past Due
                 </list-header>
                 
-                <list-event v-for="item in pastDue" :key="item.id" :item="item" @remove="removeEvent(item)" @assign="assignEvent(item, $event)" />
+                <list-event v-for="item in pastDue" :key="item.id" :item="item" @remove="removeEvent(item)" @assign="assignEvent(item, $event)"  no-reorder />
             </div>
 
             <div v-for="day in closeDays" :key="day.date">
@@ -26,7 +26,7 @@
                     </template>
                 </list-header>
 
-                <list-event v-for="item in day.events" :key="item.id" :item="item" isAssigned :isToday="day.displayDate == 'Today'" @remove="removeEvent(item)" @move="moveEvent(item, $event)" />
+                <list-event v-for="item in day.events" :key="item.id" :item="item" isAssigned :isToday="day.displayDate == 'Today'" @remove="removeEvent(item)" @move="moveEvent(item, $event)" @reorder="reOrderEvent(item, $event)" />
 
                 <q-item v-if="day.events.length == 0">
                     <q-item-section side>
@@ -45,7 +45,7 @@
                     {{ humanDate(day.date) }}
                 </list-header>
 
-                <list-event v-for="item in day.events" :key="item.id" :item="item" isAssigned @remove="removeEvent(item)" @move="moveEvent(item, $event)" />
+                <list-event v-for="item in day.events" :key="item.id" :item="item" isAssigned @remove="removeEvent(item)" @move="moveEvent(item, $event)" @reorder="reOrderEvent(item, $event)" />
             </div>
         </q-list>
         <q-page-sticky position="bottom-right" :offset="[25, 25]">
@@ -69,10 +69,7 @@ export default {
     },
     data() {
         return {
-            list: {
-                assigned: [],
-                unassigned: []
-            },
+            list: [],
             unassigned: [],
             pastDue: [],
             closeDays: [],
@@ -83,13 +80,20 @@ export default {
         }
     },
     methods: {
+        reOrderEvent(evt, offset) {
+            listUtil.reOrderEvent(evt, offset).then(() => {
+                this.loadList()
+            }).catch(err => {
+                console.error(err)
+            })
+        },
         moveEvent(evt, dayOffset) {
             let dest = offsetDate(evt.date, dayOffset)
             console.log(evt, dayOffset, dest)
             listUtil.moveEvent(evt, dest).then(() => {
                 this.loadList()
             }).catch(err => {
-                console.log(err)
+                console.error(err)
             })
         },
         assignEvent(evt, day) {
@@ -98,7 +102,7 @@ export default {
             listUtil.assignEvent(evt, dt).then(() => {
                 this.loadList()
             }).catch(err => {
-                console.log(err)
+                console.error(err)
             })
         },
         removeEvent(evt) {
@@ -112,7 +116,7 @@ export default {
             this.$store.commit('layout/drawerState', true)
         },
         sortList() { //sort list content into unassigned, pastDue, and days
-            console.log(this.today, this.tomorrow)
+            this.unassigned = []
             this.pastDue = []
             this.closeDays = []
             this.days = []
@@ -126,12 +130,11 @@ export default {
                 })
                 d = d.add(1, 'd')
             }
-            this.list.unassigned.sort((a,b) => {
-                return a.order - b.order
-            })
-            this.unassigned = this.list.unassigned
-            for (let i of this.list.assigned) {
-                if (datecmp(i.date, this.today) < 0) {
+            for (let i of this.list) {
+                if (i.date == 'unassigned') {
+                    this.unassigned.push(i)
+                }
+                else if (datecmp(i.date, this.today) < 0) {
                     if (!i.isTodo) continue //none-todo events are never pastDue
                     this.pastDue.push(i)
                 }
@@ -155,7 +158,9 @@ export default {
                     }
                 }
             }
-            //todo or not to do: sort this.days by date
+            this.unassigned.sort((a, b) => {
+                return a.order - b.order
+            })
             for (let i in this.closeDays) {
                 this.closeDays[i].events.sort((a, b) => {
                     return a.order - b.order
@@ -171,8 +176,7 @@ export default {
         },
         loadList() {
             listUtil.getAllEvents().then(res => {
-                this.list.assigned = res.assigned
-                this.list.unassigned = res.unassigned
+                this.list = res
                 console.log('getAllEvents success')
                 this.sortList()
             }).catch(err => {
@@ -191,6 +195,8 @@ export default {
             if (val) {
                 //either this.loadList() or this.sortList()
                 console.log('list re-render')
+                this.today = todayStr()
+                this.tomorrow = tomorrowStr()
                 this.sortList()
             }
         }
