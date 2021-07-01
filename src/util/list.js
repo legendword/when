@@ -75,6 +75,24 @@ const listUtil = {
         const db = await idb.data
         return db.delete('events', event.id)
     },
+    editEvent: async (oldEvent, newEvent) => {
+        const db = await idb.data
+        const ts = db.transaction(['events', 'maxOrder'], 'readwrite')
+        newEvent.date = newEvent.dateFrom ? newEvent.dateFrom.substr(0, 10) : 'unassigned'
+        if (oldEvent.date == newEvent.date) {
+            ts.objectStore('events').put(newEvent)
+        }
+        else { //perform move
+            let maxOrder = await ts.objectStore('maxOrder').get(newEvent.date)
+            if (maxOrder === undefined) {
+                maxOrder = 0
+            }
+            newEvent.order = maxOrder
+            ts.objectStore('maxOrder').put(maxOrder+1, newEvent.date)
+            ts.objectStore('events').put(newEvent)
+        }
+        return ts.done
+    },
     addEvent: async (event) => {
         const db = await idb.data
         let date = event.dateFrom ? event.dateFrom.substr(0, 10) : 'unassigned'

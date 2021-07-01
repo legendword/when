@@ -6,7 +6,7 @@
                     Unassigned
                 </list-header>
                 
-                <list-event v-for="item in unassigned" :key="item.id" :item="item" @remove="removeEvent(item)" @assign="assignEvent(item, $event)" @reorder="reOrderEvent(item, $event)" />
+                <list-event v-for="item in unassigned" :key="item.id" :item="item" @edit="editEvent(item)" @remove="removeEvent(item)" @assign="assignEvent(item, $event)" @reorder="reOrderEvent(item, $event)" />
             </div>
 
             <div v-if="pastDue.length > 0">
@@ -14,7 +14,7 @@
                     Past Due
                 </list-header>
                 
-                <list-event v-for="item in pastDue" :key="item.id" :item="item" @remove="removeEvent(item)" @assign="assignEvent(item, $event)"  no-reorder />
+                <list-event v-for="item in pastDue" :key="item.id" :item="item" @edit="editEvent(item)" @remove="removeEvent(item)" @assign="assignEvent(item, $event)"  no-reorder />
             </div>
 
             <div v-for="day in closeDays" :key="day.date">
@@ -26,7 +26,7 @@
                     </template>
                 </list-header>
 
-                <list-event v-for="item in day.events" :key="item.id" :item="item" isAssigned :isToday="day.displayDate == 'Today'" @remove="removeEvent(item)" @move="moveEvent(item, $event)" @reorder="reOrderEvent(item, $event)" />
+                <list-event v-for="item in day.events" :key="item.id" :item="item" isAssigned :isToday="day.displayDate == 'Today'" @edit="editEvent(item)" @remove="removeEvent(item)" @move="moveEvent(item, $event)" @reorder="reOrderEvent(item, $event)" />
 
                 <q-item v-if="day.events.length == 0">
                     <q-item-section side>
@@ -45,16 +45,22 @@
                     {{ humanDate(day.date) }}
                 </list-header>
 
-                <list-event v-for="item in day.events" :key="item.id" :item="item" isAssigned @remove="removeEvent(item)" @move="moveEvent(item, $event)" @reorder="reOrderEvent(item, $event)" />
+                <list-event v-for="item in day.events" :key="item.id" :item="item" isAssigned @edit="editEvent(item)" @remove="removeEvent(item)" @move="moveEvent(item, $event)" @reorder="reOrderEvent(item, $event)" />
             </div>
         </q-list>
         <q-page-sticky position="bottom-right" :offset="[25, 25]">
             <q-btn fab icon="add" color="primary" @click="openDrawer" />
         </q-page-sticky>
+        <q-dialog v-model="editEventDialog">
+            <q-card style="width: 700px; max-width: 80vw;">
+                <edit-event :event="editEventObj" :show="editEventDialog" @close="editEventDialog = false" />
+            </q-card>
+        </q-dialog>
     </q-page>
 </template>
 
 <script>
+import EditEvent from '../components/EditEvent.vue'
 import ListEvent from '../components/ListEvent.vue'
 import ListHeader from '../components/ListHeader.vue'
 import listUtil from 'src/util/list'
@@ -65,7 +71,8 @@ export default {
     name: 'List',
     components: {
         ListEvent,
-        ListHeader
+        ListHeader,
+        EditEvent
     },
     data() {
         return {
@@ -76,10 +83,16 @@ export default {
             days: [],
             today: todayStr(),
             tomorrow: tomorrowStr(),
-            humanDate
+            humanDate,
+            editEventDialog: false,
+            editEventObj: {}
         }
     },
     methods: {
+        editEvent(evt) {
+            this.editEventObj = evt
+            this.editEventDialog = true
+        },
         reOrderEvent(evt, offset) {
             listUtil.reOrderEvent(evt, offset).then(() => {
                 this.loadList()
