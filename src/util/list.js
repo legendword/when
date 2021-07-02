@@ -33,40 +33,81 @@ const listUtil = {
         });
         return ts.done;
     },
-    moveEvent: async (event, date) => {
-        //move an assigned event to a different date
+    moveEvent: async (event, date, pos = null) => {
+        //move an assigned event to a different date (pos optional)
+        //pos: the index the event will be placed
         const db = await idb.data
         const ts = db.transaction(['events', 'maxOrder'], 'readwrite')
         let maxOrder = await ts.objectStore('maxOrder').get(date)
         if (maxOrder === undefined) {
             maxOrder = 0
         }
-        let data = {...event}
-        data.date = date
-        data.order = maxOrder
+        let data = {
+            ...event,
+            date: date
+        }
         if (data.dateFrom) {
             data.dateFrom = date + data.dateFrom.substr(10)
         }
         if (data.dateTo) {
             data.dateTo = date + data.dateTo.substr(10)
         }
+
+        if (pos == null) {
+            data.order = maxOrder
+        }
+        else {
+            let events = await ts.objectStore('events').index('dateIndex').getAll(event.date)
+            events.sort((a, b) => {
+                return a.order - b.order
+            })
+            data.order = pos < events.length ? events[pos].order : maxOrder
+            for (let i=pos;i<events.length;i++) {
+                await ts.objectStore('events').put({
+                    ...events[i],
+                    order: events[i].order + 1
+                });
+            }
+        }
+
         ts.objectStore('maxOrder').put(maxOrder+1, date)
         ts.objectStore('events').put(data)
         return ts.done
     },
-    assignEvent: async (event, date) => {
-        //assign an unassigned event to a date
+    assignEvent: async (event, date, pos = null) => {
+        //assign an unassigned event to a date (pos optional)
+        //pos: the index the event will be placed
         const db = await idb.data
         const ts = db.transaction(['events', 'maxOrder'], 'readwrite')
         let maxOrder = await ts.objectStore('maxOrder').get(date)
         if (maxOrder === undefined) {
             maxOrder = 0
         }
-        let data = {...event}
-        data.dateFrom = date
-        data.fullDay = true
-        data.date = date
-        data.order = maxOrder
+
+        let data = {
+            ...event,
+            dateFrom: date,
+            fullDay: true,
+            date: date
+        };
+
+        if (pos == null) {
+            data.order = maxOrder
+        }
+        else {
+            let events = await ts.objectStore('events').index('dateIndex').getAll(event.date)
+            events.sort((a, b) => {
+                return a.order - b.order
+            })
+            data.order = pos < events.length ? events[pos].order : maxOrder
+            for (let i=pos;i<events.length;i++) {
+                await ts.objectStore('events').put({
+                    ...events[i],
+                    order: events[i].order + 1
+                });
+            }
+        }
+        
         ts.objectStore('maxOrder').put(maxOrder+1, date)
         ts.objectStore('events').put(data)
         return ts.done

@@ -1,5 +1,5 @@
 <template>
-    <q-item draggable dense class="q-my-sm list-event" @mouseenter="hoverState(true)" @mouseleave="hoverState(false)">
+    <q-item draggable dense :class="'q-my-sm list-event' + (isDragging ? ' list-event-dragging' : '')" @mouseenter="hoverState(true)" @mouseleave="hoverState(false)">
         <q-item-section side top>
             <q-checkbox v-model="checked" v-if="item.isTodo" />
             <div class="checkbox-placeholder flex items-center justify-center" v-else>
@@ -77,6 +77,10 @@ export default {
         showDate: {
             type: Boolean,
             default: false
+        },
+        isDragging: {
+            type: Boolean,
+            default: false
         }
     },
     data() {
@@ -103,6 +107,9 @@ export default {
     &:hover {
         background-color: $grey-3;
     }
+}
+.list-event-dragging {
+    opacity: 0.5;
 }
 .checkbox-placeholder {
     width: 40px; /* smaller than 40px to allow text to be a bit to the left */

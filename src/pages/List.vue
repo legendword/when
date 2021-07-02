@@ -6,7 +6,7 @@
                     Unassigned
                 </list-header>
                 
-                <list-event v-for="item in unassigned" :key="item.id" :item="item" @edit="editEvent(item)" @remove="removeEvent(item)" @assign="assignEvent(item, $event)" @reorder="reOrderEvent(item, $event)" />
+                <list-event v-for="item in unassigned" :key="item.id" :item="item" :is-dragging="drag.event && drag.event.id == item.id" @edit="editEvent(item)" @remove="removeEvent(item)" @assign="assignEvent(item, $event)" @reorder="reOrderEvent(item, $event)" @dragstart.native="dragStart(item, 'unassigned', null)" @dragover.native="dragOver($event)" @drop.native="drop($event)" @dragenter.native="dragEnter(item, 'unassigned', null)" @dragleave.native="dragLeave()" />
             </div>
 
             <div v-if="pastDue.length > 0">
@@ -17,8 +17,8 @@
                 <list-event v-for="item in pastDue" :key="item.id" :item="item" @edit="editEvent(item)" @remove="removeEvent(item)" @assign="assignEvent(item, $event)" no-reorder show-date />
             </div>
 
-            <div v-for="day in closeDays" :key="day.date">
-                <list-header :color="day.displayDate == 'Today' ? 'orange-8' : 'light-green-8'">
+            <div v-for="(day, dayInd) in closeDays" :key="day.date">
+                <list-header :color="day.displayDate == 'Today' ? 'orange-8' : 'light-green-8'" @dragover.native="dragOver($event)" @dragenter.native="dragEnter(0, 'closeDays', dayInd)" @drop.native="drop($event)">
                     {{ day.displayDate }}
 
                     <template v-slot:side>
@@ -26,7 +26,7 @@
                     </template>
                 </list-header>
 
-                <list-event v-for="item in day.events" :key="item.id" :item="item" isAssigned :isToday="day.displayDate == 'Today'" @edit="editEvent(item)" @remove="removeEvent(item)" @move="moveEvent(item, $event)" @reorder="reOrderEvent(item, $event)" />
+                <list-event v-for="item in day.events" :key="item.id" :item="item" is-assigned :is-today="day.displayDate == 'Today'" @edit="editEvent(item)" @remove="removeEvent(item)" @move="moveEvent(item, $event)" @reorder="reOrderEvent(item, $event)" :is-dragging="drag.event && drag.event.id == item.id" @dragstart.native="dragStart(item, 'closeDays', dayInd)" @dragover.native="dragOver($event)" @drop.native="drop($event)" @dragenter.native="dragEnter(item, 'closeDays', dayInd)" @dragleave.native="dragLeave()" />
 
                 <q-item v-if="day.events.length == 0">
                     <q-item-section side>
@@ -40,12 +40,12 @@
                 </q-item>
             </div>
 
-            <div v-for="day in days" :key="day.date">
-                <list-header color="light-green-8">
+            <div v-for="(day, dayInd) in days" :key="day.date">
+                <list-header color="light-green-8" @dragover.native="dragOver($event)" @dragenter.native="dragEnter(0, 'closeDays', dayInd)" @drop.native="drop($event)">
                     {{ humanDate(day.date) }}
                 </list-header>
 
-                <list-event v-for="item in day.events" :key="item.id" :item="item" isAssigned @edit="editEvent(item)" @remove="removeEvent(item)" @move="moveEvent(item, $event)" @reorder="reOrderEvent(item, $event)" />
+                <list-event v-for="item in day.events" :key="item.id" :item="item" isAssigned @edit="editEvent(item)" @remove="removeEvent(item)" @move="moveEvent(item, $event)" @reorder="reOrderEvent(item, $event)" :is-dragging="drag.event && drag.event.id == item.id" @dragstart.native="dragStart(item, 'days', dayInd)" @dragover.native="dragOver($event)" @drop.native="drop($event)" @dragenter.native="dragEnter(item, 'days', dayInd)" @dragleave.native="dragLeave()" />
             </div>
         </q-list>
         <q-page-sticky position="bottom-right" :offset="[25, 25]">
@@ -63,7 +63,8 @@
 import EditEvent from '../components/EditEvent.vue'
 import ListEvent from '../components/ListEvent.vue'
 import ListHeader from '../components/ListHeader.vue'
-import listUtil from 'src/util/list'
+import listUtil from '../util/list'
+import { arrayMove, arrayTransfer } from '../util/array'
 import moment from 'moment'
 import { datecmp, offsetDate, humanDate, todayStr, tomorrowStr } from 'src/util/date'
 //import { mapState } from 'vuex'
@@ -85,10 +86,134 @@ export default {
             tomorrow: tomorrowStr(),
             humanDate,
             editEventDialog: false,
-            editEventObj: {}
+            editEventObj: {},
+            drag: {
+                event: null,
+                originalSection: null,
+                originalSubsection: null,
+                originalIndex: null,
+                currentSection: null,
+                currentSubsection: null,
+                currentIndex: null,
+                hover: null
+            }
         }
     },
     methods: {
+        drop(e) {
+            e.preventDefault()
+            let { currentSection, originalSection, currentSubsection, originalSubsection, currentIndex, originalIndex } = this.drag
+            console.log('drop', currentSection, originalSection, currentSubsection, originalSubsection, currentIndex, originalIndex)
+            if (currentSection == 'pastDue') {
+                this.drag.event = null
+                this.sortList()
+                return
+            }
+            if (currentSection == originalSection && currentSubsection == originalSubsection) {
+                if (currentIndex == originalIndex) {
+                    this.drag.event = null
+                    return //nothing to do here
+                }
+                console.log('drop: reOrderEvent')
+                listUtil.reOrderEvent(this.drag.event, currentIndex - originalIndex).then(() => {
+                    this.loadList()
+                }).catch(err => {
+                    console.error(err)
+                })
+            }
+            else {
+                if (currentSection == 'unassigned') {
+                    //currently does not support unassigning events
+                    //may be added in a future release
+                    this.drag.event = null
+                    return
+                }
+                let targetDate = currentSubsection == null ? currentSection : this[currentSection][currentSubsection].date
+                if (this.drag.event.date == 'unassigned') {
+                    console.log('drop: assignEvent', targetDate)
+                    listUtil.assignEvent(this.drag.event, targetDate, currentIndex).then(() => {
+                        this.loadList()
+                    }).catch(err => {
+                        console.error(err)
+                    })
+                }
+                else {
+                    console.log('drop: moveEvent', targetDate)
+                    listUtil.moveEvent(this.drag.event, targetDate, currentIndex).then(() => {
+                        this.loadList()
+                    }).catch(err => {
+                        console.error(err)
+                    })
+                }
+            }
+            this.drag.event = null
+        },
+        dragEnter(evt, section, subsection) {
+            console.log('dragEnter', evt === 0 ? evt : evt.title, section, subsection)
+            if (!this.drag.event) return
+            if (evt === 0) {
+                this.drag.hover = null
+                let cursec = this.drag.currentSection
+                let cursub = this.drag.currentSubsection
+                if (cursec == section && cursub == subsection) {
+                    let arr = subsection==null?this[section]:this[section][subsection].events
+                    arrayMove(arr, this.drag.currentIndex, 0)
+                }
+                else {
+                    let oldArr = cursub==null?this[cursec]:this[cursec][cursub].events
+                    let newArr = subsection==null?this[section]:this[section][subsection].events
+                    //console.log('dragEnter!', oldArr, newArr, this.drag.currentIndex)
+                    
+                    arrayTransfer(oldArr, newArr, this.drag.currentIndex, 0)
+                    //console.log(oldArr, newArr)
+                    this.drag.currentSection = section
+                    this.drag.currentSubsection = subsection
+                }
+                this.drag.currentIndex = 0
+            }
+            else if (evt.id == this.drag.event.id) return
+            else if (this.drag.hover != evt.id) {
+                this.drag.hover = evt.id
+                let cursec = this.drag.currentSection
+                let cursub = this.drag.currentSubsection
+                if (cursec == section) {
+                    let arr = subsection==null?this[section]:this[section][subsection].events
+                    let newIndex = arr.findIndex(v => v.id == evt.id)
+                    arrayMove(arr, this.drag.currentIndex, newIndex)
+                    this.drag.currentIndex = newIndex
+                }
+                else {
+                    let oldArr = cursub==null?this[cursec]:this[cursec][cursub].events
+                    let newArr = subsection==null?this[section]:this[section][subsection].events
+                    let newIndex = newArr.findIndex(v => v.id == evt.id)
+                    arrayTransfer(oldArr, newArr, this.drag.currentIndex, newIndex)
+                    this.drag.currentSection = section
+                    this.drag.currentSubsection = subsection
+                    this.drag.currentIndex = newIndex
+                }
+            }
+        },
+        dragLeave() {
+            this.drag.hover = null
+        },
+        dragOver(e) {
+            e.preventDefault()
+        },
+        dragEnd() {
+            console.log('dragEnd')
+        },
+        dragStart(evt, section, subsection) {
+            console.log('dragStart', evt.title)
+            this.drag.event = evt
+            this.drag.currentSection = section
+            this.drag.currentSubsection = subsection
+            let arr = subsection==null?this[section]:this[section][subsection].events
+            let ind = arr.findIndex(v => v.id == evt.id)
+            this.drag.currentIndex = ind
+            this.drag.originalSection = section
+            this.drag.originalSubsection = subsection
+            this.drag.originalIndex = ind
+        },
         editEvent(evt) {
             this.editEventObj = evt
             this.editEventDialog = true
