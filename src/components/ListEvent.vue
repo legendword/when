@@ -1,5 +1,5 @@
 <template>
-    <q-item draggable dense class="q-my-sm list-event">
+    <q-item draggable dense class="q-my-sm list-event" @mouseenter="hoverState(true)" @mouseleave="hoverState(false)">
         <q-item-section side top>
             <q-checkbox v-model="checked" v-if="item.isTodo" />
             <div class="checkbox-placeholder flex items-center justify-center" v-else>
@@ -9,6 +9,7 @@
         <q-item-section>
             <div class="list-title">{{ item.title }}</div>
             <div class="list-notes">{{ item.notes }}</div>
+            <div class="list-notes" v-if="showDate && item.date != 'unassigned'">{{ hover ? dateAgo(item.dateFrom) : item.dateFrom }}</div>
         </q-item-section>
         
         <q-menu
@@ -55,6 +56,7 @@
 </template>
 
 <script>
+import { dateAgo } from '../util/date'
 export default {
     name: 'ListEvent',
     props: {
@@ -71,11 +73,22 @@ export default {
         noReorder: {
             type: Boolean,
             default: false
+        },
+        showDate: {
+            type: Boolean,
+            default: false
         }
     },
     data() {
         return {
-            checked: false
+            checked: false,
+            hover: false,
+            dateAgo
+        }
+    },
+    methods: {
+        hoverState(val) {
+            this.hover = val
         }
     }
 }

@@ -14,7 +14,7 @@
                     Past Due
                 </list-header>
                 
-                <list-event v-for="item in pastDue" :key="item.id" :item="item" @edit="editEvent(item)" @remove="removeEvent(item)" @assign="assignEvent(item, $event)"  no-reorder />
+                <list-event v-for="item in pastDue" :key="item.id" :item="item" @edit="editEvent(item)" @remove="removeEvent(item)" @assign="assignEvent(item, $event)" no-reorder show-date />
             </div>
 
             <div v-for="day in closeDays" :key="day.date">

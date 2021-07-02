@@ -56,3 +56,6 @@ export const offsetDate = function(date, offset) {
     //offset 'date' str by 'offset' days
     return moment(date, 'YYYY-MM-DD').add(offset, 'd').format('YYYY-MM-DD')
 }
+export const dateAgo = function(date) {
+    return moment(date).fromNow()
+}
