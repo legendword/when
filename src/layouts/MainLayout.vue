@@ -9,7 +9,7 @@
                         <q-icon name="list" />
                     </q-item-section>
                     <q-item-section>
-                        List
+                        Schedule
                     </q-item-section>
                 </q-item>
             </q-list>
