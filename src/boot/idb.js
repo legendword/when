@@ -10,6 +10,14 @@ export const idb = {
         const events = db.createObjectStore('events', { keyPath: 'id', autoIncrement: true })
         events.createIndex('dateIndex', 'date')
         db.createObjectStore('maxOrder')
+        db.createObjectStore('deadlines', { keyPath: 'id', autoIncrement: true })
+      }
+    }
+  }),
+  metadata: openDB('metadata', 1, {
+    upgrade: (db, oldVersion, newVersion, transaction) => {
+      if (oldVersion <= 0) {
+        db.createObjectStore('settings')
       }
     }
   })

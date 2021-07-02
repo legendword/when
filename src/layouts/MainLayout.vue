@@ -3,16 +3,37 @@
 
         <q-drawer show-if-above v-model="menu" side="left" :width="250">
             <div class="text-h5 q-mt-md q-mb-sm q-ml-md">When</div>
-            <q-list padding class="menu-list">
-                <q-item clickable v-ripple to="/" exact>
-                    <q-item-section avatar>
-                        <q-icon name="list" />
-                    </q-item-section>
-                    <q-item-section>
-                        Schedule
-                    </q-item-section>
-                </q-item>
-            </q-list>
+            <div class="column">
+                <q-list padding class="menu-list">
+                    <q-item clickable v-ripple to="/" exact>
+                        <q-item-section avatar>
+                            <q-icon name="list" />
+                        </q-item-section>
+                        <q-item-section>
+                            Schedule
+                        </q-item-section>
+                    </q-item>
+                    <q-item clickable v-ripple to="/deadlines" exact>
+                        <q-item-section avatar>
+                            <q-icon name="alarm" />
+                        </q-item-section>
+                        <q-item-section>
+                            Deadlines
+                        </q-item-section>
+                    </q-item>
+                </q-list>
+                <q-separator />
+                <q-list padding class="menu-list">
+                    <q-item clickable v-ripple to="/support" exact>
+                        <q-item-section avatar>
+                            <q-icon name="help_outline" />
+                        </q-item-section>
+                        <q-item-section>
+                            Support
+                        </q-item-section>
+                    </q-item>
+                </q-list>
+            </div>
         </q-drawer>
 
         <q-drawer v-model="drawer" side="right" overlay elevated behavior="mobile" :width="drawerWidth">
