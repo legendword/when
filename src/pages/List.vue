@@ -14,7 +14,7 @@
                     Past Due
                 </list-header>
                 
-                <list-event v-for="item in pastDue" :key="item.id" :item="item" @edit="editEvent(item)" @remove="removeEvent(item)" @assign="assignEvent(item, $event)" no-reorder show-date />
+                <list-event v-for="item in pastDue" :key="item.id" :item="item" @edit="editEvent(item)" @remove="removeEvent(item)" @assign="assignEvent(item, $event)" no-reorder show-date :is-dragging="drag.event && drag.event.id == item.id" @dragstart.native="dragStart(item, 'pastDue', null)" @drop.native="drop($event)" @dragend.native="dragEnd()" />
             </div>
 
             <div v-for="(day, dayInd) in closeDays" :key="day.date">
@@ -201,6 +201,8 @@ export default {
         },
         dragEnd() {
             console.log('dragEnd')
+            this.drag.event = null
+            this.sortList()
         },
         dragStart(evt, section, subsection) {
             console.log('dragStart', evt.title)
