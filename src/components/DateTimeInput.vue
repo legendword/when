@@ -12,7 +12,7 @@
                         <div v-if="info.prepend">
                             {{'&nbsp;' + info.prepend + '&nbsp;'}}
                         </div>
-                        <q-input outlined dense :value="dateComponents[name]" :maxlength="info.len" :style="{width: name == 'year' ? '4rem' : '2.5rem'}" input-class="text-center" @focus="selectAll(info.id)" @input="updateValue(name, $event)" debounce="300" ref="dateInputs" />
+                        <q-input outlined dense :value="dateComponents[name]" :maxlength="info.len" :style="{width: name == 'year' ? '4rem' : '2.5rem'}" input-class="text-center" @focus="selectAll(info.id)" @input="updateValue(name, $event)" debounce="1000" ref="dateInputs" />
                     </div>
                 </div>
                 <div class="q-mb-md q-gutter-md row items-start">

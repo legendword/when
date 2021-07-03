@@ -6,7 +6,7 @@
                     Unassigned
                 </list-header>
                 
-                <list-event v-for="item in unassigned" :key="item.id" :item="item" :is-dragging="drag.event && drag.event.id == item.id" @edit="editEvent(item)" @remove="removeEvent(item)" @assign="assignEvent(item, $event)" @reorder="reOrderEvent(item, $event)" @dragstart.native="dragStart(item, 'unassigned', null)" @dragover.native="dragOver($event)" @drop.native="drop($event)" @dragenter.native="dragEnter(item, 'unassigned', null)" @dragleave.native="dragLeave()" />
+                <list-event v-for="item in unassigned" :key="item.id" :item="item" :is-dragging="drag.active && drag.event.id == item.id" @edit="editEvent(item)" @remove="removeEvent(item)" @assign="assignEvent(item, $event)" @reorder="reOrderEvent(item, $event)" @dragstart.native="dragStart(item, 'unassigned', null)" @dragover.native="dragOver($event)" @drop.native="drop($event)" @dragenter.native="dragEnter(item, 'unassigned', null)" @dragleave.native="dragLeave()" @dragend.native="dragEnd()" />
             </div>
 
             <div v-if="pastDue.length > 0">
@@ -14,7 +14,7 @@
                     Past Due
                 </list-header>
                 
-                <list-event v-for="item in pastDue" :key="item.id" :item="item" @edit="editEvent(item)" @remove="removeEvent(item)" @assign="assignEvent(item, $event)" no-reorder show-date :is-dragging="drag.event && drag.event.id == item.id" @dragstart.native="dragStart(item, 'pastDue', null)" @drop.native="drop($event)" @dragend.native="dragEnd()" />
+                <list-event v-for="item in pastDue" :key="item.id" :item="item" @edit="editEvent(item)" @remove="removeEvent(item)" @assign="assignEvent(item, $event)" no-reorder show-date :is-dragging="drag.active && drag.event.id == item.id" @dragstart.native="dragStart(item, 'pastDue', null)" @drop.native="drop($event)" @dragend.native="dragEnd()" />
             </div>
 
             <div v-for="(day, dayInd) in closeDays" :key="day.date">
@@ -26,7 +26,7 @@
                     </template>
                 </list-header>
 
-                <list-event v-for="item in day.events" :key="item.id" :item="item" is-assigned :is-today="day.displayDate == 'Today'" @edit="editEvent(item)" @remove="removeEvent(item)" @move="moveEvent(item, $event)" @reorder="reOrderEvent(item, $event)" :is-dragging="drag.event && drag.event.id == item.id" @dragstart.native="dragStart(item, 'closeDays', dayInd)" @dragover.native="dragOver($event)" @drop.native="drop($event)" @dragenter.native="dragEnter(item, 'closeDays', dayInd)" @dragleave.native="dragLeave()" />
+                <list-event v-for="item in day.events" :key="item.id" :item="item" is-assigned :is-today="day.displayDate == 'Today'" @edit="editEvent(item)" @remove="removeEvent(item)" @move="moveEvent(item, $event)" @reorder="reOrderEvent(item, $event)" :is-dragging="drag.active && drag.event.id == item.id" @dragstart.native="dragStart(item, 'closeDays', dayInd)" @dragover.native="dragOver($event)" @drop.native="drop($event)" @dragenter.native="dragEnter(item, 'closeDays', dayInd)" @dragleave.native="dragLeave()" @dragend.native="dragEnd()" />
 
                 <q-item v-if="day.events.length == 0">
                     <q-item-section side>
@@ -45,7 +45,7 @@
                     {{ humanDate(day.date) }}
                 </list-header>
 
-                <list-event v-for="item in day.events" :key="item.id" :item="item" isAssigned @edit="editEvent(item)" @remove="removeEvent(item)" @move="moveEvent(item, $event)" @reorder="reOrderEvent(item, $event)" :is-dragging="drag.event && drag.event.id == item.id" @dragstart.native="dragStart(item, 'days', dayInd)" @dragover.native="dragOver($event)" @drop.native="drop($event)" @dragenter.native="dragEnter(item, 'days', dayInd)" @dragleave.native="dragLeave()" />
+                <list-event v-for="item in day.events" :key="item.id" :item="item" isAssigned @edit="editEvent(item)" @remove="removeEvent(item)" @move="moveEvent(item, $event)" @reorder="reOrderEvent(item, $event)" :is-dragging="drag.active && drag.event.id == item.id" @dragstart.native="dragStart(item, 'days', dayInd)" @dragover.native="dragOver($event)" @drop.native="drop($event)" @dragenter.native="dragEnter(item, 'days', dayInd)" @dragleave.native="dragLeave()" @dragend.native="dragEnd()" />
             </div>
         </q-list>
         <q-page-sticky position="bottom-right" :offset="[25, 25]">
@@ -88,6 +88,7 @@ export default {
             editEventDialog: false,
             editEventObj: {},
             drag: {
+                active: false,
                 event: null,
                 originalSection: null,
                 originalSubsection: null,
@@ -105,13 +106,13 @@ export default {
             let { currentSection, originalSection, currentSubsection, originalSubsection, currentIndex, originalIndex } = this.drag
             console.log('drop', currentSection, originalSection, currentSubsection, originalSubsection, currentIndex, originalIndex)
             if (currentSection == 'pastDue') {
-                this.drag.event = null
+                this.dragEnd()
                 this.sortList()
                 return
             }
             if (currentSection == originalSection && currentSubsection == originalSubsection) {
                 if (currentIndex == originalIndex) {
-                    this.drag.event = null
+                    this.dragEnd()
                     return //nothing to do here
                 }
                 console.log('drop: reOrderEvent')
@@ -125,7 +126,8 @@ export default {
                 if (currentSection == 'unassigned') {
                     //currently does not support unassigning events
                     //may be added in a future release
-                    this.drag.event = null
+                    this.dragEnd()
+                    this.sortList()
                     return
                 }
                 let targetDate = currentSubsection == null ? currentSection : this[currentSection][currentSubsection].date
@@ -146,7 +148,7 @@ export default {
                     })
                 }
             }
-            this.drag.event = null
+            this.dragEnd()
         },
         dragEnter(evt, section, subsection) {
             console.log('dragEnter', evt === 0 ? evt : evt.title, section, subsection)
@@ -201,11 +203,13 @@ export default {
         },
         dragEnd() {
             console.log('dragEnd')
-            this.drag.event = null
-            this.sortList()
+            this.drag.active = false
+            //this.drag.event = null
+            //this.sortList()
         },
         dragStart(evt, section, subsection) {
             console.log('dragStart', evt.title)
+            this.drag.active = true
             this.drag.event = evt
             this.drag.currentSection = section
             this.drag.currentSubsection = subsection
