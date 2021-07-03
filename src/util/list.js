@@ -1,5 +1,4 @@
 /* list util for interacting with idb
- * supports adding
  */
 import { idb } from '../boot/idb'
 const listUtil = {

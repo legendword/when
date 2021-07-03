@@ -10,7 +10,8 @@ export const idb = {
         const events = db.createObjectStore('events', { keyPath: 'id', autoIncrement: true })
         events.createIndex('dateIndex', 'date')
         db.createObjectStore('maxOrder')
-        db.createObjectStore('deadlines', { keyPath: 'id', autoIncrement: true })
+        const deadlines = db.createObjectStore('deadlines', { keyPath: 'id', autoIncrement: true })
+        deadlines.createIndex('dateIndex', 'dueDate')
       }
     }
   }),

@@ -2,14 +2,14 @@
     <q-page padding>
         <div class="text-center q-mt-md q-mb-lg">
             <div class="text-h4">When</div>
-            <div class="text-subtitle2">The ultimate day planner &amp; deadlines tracker.</div>
+            <div class="text-subtitle2">The ultimate day planner &amp; deadline tracker.</div>
             <div class="text-body2 text-grey-8">v{{appInfo.version}}</div>
         </div>
         <section class="row q-my-xl justify-around">
             <div class="col-12 col-sm-6 col-md-4 q-pa-sm">
                 <q-card class="full-height column justify-between">
                     <q-card-section>
-                        <div class="text-h5 q-mb-md">Help &amp; Support</div>
+                        <div class="text-h5 q-mb-md">Support &amp; Feedback</div>
                         <div class="text-body1">Join our Discord community for detailed questions, discussions, and feature requests.</div>
                     </q-card-section>
                     <q-card-actions>
