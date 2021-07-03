@@ -3,6 +3,10 @@
 import moment from 'moment'
 import { idb } from '../boot/idb'
 const deadlinesUtil = {
+    remove: async (ddlId) => {
+        const db = await idb.data
+        return db.delete('deadlines', ddlId)
+    },
     update: async (ddl) => {
         const db = await idb.data
         return db.put('deadlines', ddl)

@@ -52,7 +52,7 @@
             <q-btn fab icon="add" color="primary" @click="openDrawer" />
         </q-page-sticky>
         <q-dialog v-model="editEventDialog">
-            <q-card style="width: 700px; max-width: 80vw;">
+            <q-card style="width: 1000px; max-width: 90vw;">
                 <edit-event :event="editEventObj" :show="editEventDialog" @close="editEventDialog = false" />
             </q-card>
         </q-dialog>

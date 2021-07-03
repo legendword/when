@@ -1,6 +1,6 @@
 <template>
     <div class="q-py-md q-px-xl">
-        <div class="q-my-md text-h4">New Deadline</div>
+        <div class="q-my-md text-h4">Edit Deadline</div>
         <div class="full-width">
             <div class="q-mb-lg">
                 <q-input v-model="value.title" label="Title" ref="title" input-class="text-input" />
@@ -23,7 +23,10 @@ import DateTimeInput from './DateTimeInput.vue'
 import moment from 'moment'
 import deadlinesUtil from '../util/deadlines'
 export default {
-    name: 'NewDeadline',
+    name: 'EditDeadline',
+    props: {
+        ddl: Object
+    },
     components: {
         DateTimeInput
     },
@@ -44,6 +47,7 @@ export default {
         }
     },
     mounted() {
+        this.value = {...this.ddl}
         this.$refs.title.focus()
     },
     methods: {
@@ -66,11 +70,11 @@ export default {
             }
         },
         submit() {
-            deadlinesUtil.add(this.value).then(() => {
-                console.log('deadline add success')
+            deadlinesUtil.update(this.value).then(() => {
+                console.log('deadline edit success')
                 this.$emit('close')
             }).catch(err => {
-                console.error('deadline add error: ', err)
+                console.error('deadline edit error: ', err)
             })
         }
     }

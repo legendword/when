@@ -47,7 +47,7 @@
                     <q-item-section class="text-primary">Edit Event</q-item-section>
                 </q-item>
                 <q-item clickable v-close-popup @click="$emit('remove')">
-                    <q-item-section class="text-negative">Remove Event</q-item-section>
+                    <q-item-section class="text-negative">Delete Event</q-item-section>
                 </q-item>
             </q-list>
 
