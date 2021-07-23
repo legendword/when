@@ -1,4 +1,9 @@
 import moment from "moment"
+export const calendarTime = function(time) {
+    return moment(time, 'YYYY-MM-DD HH:mm').calendar({
+        sameElse: 'YYYY-MM-DD'
+    })
+}
 export const datecmp = function(a, b) {
     //compares xxxx-xx-xx
     let x = a.split("-").map(v => parseInt(v)), y = b.split("-").map(v => parseInt(v))
