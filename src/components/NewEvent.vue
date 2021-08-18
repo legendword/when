@@ -88,10 +88,19 @@ export default {
             }
         },
         submit() {
+            if (!this.isTodo && this.dateTo && this.dateFrom && this.dateTo < this.dateFrom) {
+                this.$q.notify({
+                    type: 'negative',
+                    message: 'Invalid date range.',
+                    timeout: 2500
+                })
+                return
+            }
             let event = {};
             for (let i of ['title', 'isTodo', 'fullDay', 'dateFrom', 'dateTo', 'notes']) {
                 event[i] = this[i]
             }
+            event['done'] = false // for todo
             listUtil.addEvent(event).then(() => {
                 console.log('addEvent success')
                 this.$store.commit('data/newEvent', true)

@@ -115,6 +115,14 @@ const listUtil = {
         const db = await idb.data
         return db.delete('events', event.id)
     },
+    changeEventDone: async (event, val) => {
+        const db = await idb.data
+        let newEvent = {
+            ...event,
+            done: val
+        }
+        return db.put('events', newEvent)
+    },
     editEvent: async (oldEvent, newEvent) => {
         const db = await idb.data
         const ts = db.transaction(['events', 'maxOrder'], 'readwrite')

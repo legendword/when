@@ -66,6 +66,14 @@ export default {
             }
         },
         submit() {
+            if (this.value.dueDate < this.value.startDate) {
+                this.$q.notify({
+                    type: 'negative',
+                    message: 'Invalid date range.',
+                    timeout: 2500
+                })
+                return
+            }
             deadlinesUtil.add(this.value).then(() => {
                 console.log('deadline add success')
                 this.$emit('close')

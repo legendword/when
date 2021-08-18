@@ -1,7 +1,7 @@
 <template>
     <q-item draggable dense :class="'q-my-sm list-event' + (isDragging ? ' list-event-dragging' : '')" @mouseenter="hoverState(true)" @mouseleave="hoverState(false)">
         <q-item-section side top>
-            <q-checkbox v-model="checked" v-if="item.isTodo" />
+            <q-checkbox :value="item.done" @input="checkItem" v-if="item.isTodo" />
             <div class="checkbox-placeholder flex items-center justify-center" v-else>
                 <q-icon name="event" size="sm" />
             </div>
@@ -56,6 +56,7 @@
 </template>
 
 <script>
+import listUtil from 'src/util/list'
 import { dateAgo } from '../util/date'
 export default {
     name: 'ListEvent',
@@ -85,7 +86,7 @@ export default {
     },
     data() {
         return {
-            checked: false,
+            // checked: false,
             hover: false,
             dateAgo
         }
@@ -93,6 +94,11 @@ export default {
     methods: {
         hoverState(val) {
             this.hover = val
+        },
+        checkItem(val) {
+            listUtil.changeEventDone(this.item, val).then(() => {
+                this.item.done = val
+            })
         }
     }
 }
