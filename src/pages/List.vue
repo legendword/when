@@ -359,6 +359,7 @@ export default {
         }
     },
     created() {
+        this.$store.commit('layout/pageTitle', 'Schedule')
         this.loadList()
     }
 }

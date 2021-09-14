@@ -35,9 +35,6 @@
                 <q-item>
                     <q-item-section>Multi-day events not displaying properly.</q-item-section>
                 </q-item>
-                <q-item>
-                    <q-item-section>Checking todos does nothing.</q-item-section>
-                </q-item>
             </q-list>
         </section>
     </q-page>
@@ -57,6 +54,9 @@ export default {
             if (!appInfo[name]) return
             window.open(appInfo[name])
         }
+    },
+    created() {
+        this.$store.commit('layout/pageTitle', 'Support')
     }
 }
 </script>

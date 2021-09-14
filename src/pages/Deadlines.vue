@@ -1,5 +1,5 @@
 <template>
-    <q-page class="q-px-md q-py-lg">
+    <q-page class="q-px-md q-pb-lg">
         <div class="q-my-md">
             <div class="text-h6 text-grey-7">Active Deadlines</div>
         </div>
@@ -226,6 +226,9 @@ export default {
     },
     beforeDestroy() {
         clearInterval(this.timer)
+    },
+    created() {
+        this.$store.commit('layout/pageTitle', 'Deadlines')
     }
 }
 </script>
