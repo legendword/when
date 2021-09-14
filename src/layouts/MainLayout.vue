@@ -36,9 +36,11 @@
             </div>
         </q-drawer>
 
+        <!--
         <q-drawer v-model="drawer" side="right" overlay elevated behavior="mobile" :width="drawerWidth">
             <new-event :show="drawer" @close="drawer = false" />
         </q-drawer>
+        -->
 
         <q-page-container>
             <router-view />
@@ -55,29 +57,12 @@
 </template>
 
 <script>
-import NewEvent from '../components/NewEvent.vue'
 export default {
     name: 'MainLayout',
-    components: {
-        NewEvent
-    },
     data () {
         return {
             menu: true,
             pageHiddenProp: 'hidden'
-        }
-    },
-    computed: {
-        drawer: {
-            get: function() {
-                return this.$store.state.layout.drawer
-            },
-            set: function(val) {
-                this.$store.commit('layout/drawerState', val)
-            }
-        },
-        drawerWidth() {
-            return this.$q.screen.width * 0.8;
         }
     },
     methods: {

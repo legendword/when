@@ -49,8 +49,13 @@
             </div>
         </q-list>
         <q-page-sticky position="bottom-right" :offset="[25, 25]">
-            <q-btn fab icon="add" color="primary" @click="openDrawer" />
+            <q-btn fab icon="add" color="primary" @click="newEventDialog = true" />
         </q-page-sticky>
+        <q-dialog v-model="newEventDialog">
+            <q-card style="width: 1000px; max-width: 90vw;">
+                <new-event :show="newEventDialog" @close="newEventDialog = false" />
+            </q-card>
+        </q-dialog>
         <q-dialog v-model="editEventDialog">
             <q-card style="width: 1000px; max-width: 90vw;">
                 <edit-event :event="editEventObj" :show="editEventDialog" @close="editEventDialog = false" />
@@ -60,6 +65,7 @@
 </template>
 
 <script>
+import NewEvent from '../components/NewEvent.vue'
 import EditEvent from '../components/EditEvent.vue'
 import ListEvent from '../components/ListEvent.vue'
 import ListHeader from '../components/ListHeader.vue'
@@ -73,6 +79,7 @@ export default {
     components: {
         ListEvent,
         ListHeader,
+        NewEvent,
         EditEvent
     },
     data() {
@@ -85,6 +92,7 @@ export default {
             today: todayStr(),
             tomorrow: tomorrowStr(),
             humanDate,
+            newEventDialog: false,
             editEventDialog: false,
             editEventObj: {},
             drag: {
@@ -255,9 +263,6 @@ export default {
             }).catch(err => {
                 console.error(err)
             })
-        },
-        openDrawer() {
-            this.$store.commit('layout/drawerState', true)
         },
         sortList() { //sort list content into unassigned, pastDue, and days
             this.unassigned = []
