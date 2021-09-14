@@ -1,8 +1,8 @@
 <template>
     <q-layout view="lHh LpR fFf">
 
-        <q-header bordered class="bg-white text-primary">
-            <q-toolbar class="q-pt-md q-pb-sm">
+        <q-header bordered class="bg-white text-primary top-bar">
+            <q-toolbar>
                 <q-btn dense flat round :icon="menu ? 'chevron_left' : 'chevron_right'" @click="menu = !menu" />
 
                 <q-toolbar-title>
@@ -11,8 +11,8 @@
             </q-toolbar>
         </q-header>
 
-        <q-drawer show-if-above v-model="menu" side="left" :width="250">
-            <div class="text-h5 q-mt-md q-mb-sm q-ml-md">When</div>
+        <q-drawer show-if-above v-model="menu" side="left" :width="250" bordered>
+            <div class="text-h5 top-bar q-ml-md">When</div>
             <div class="column">
                 <q-list padding class="menu-list">
                     <q-item clickable v-ripple to="/" exact>
@@ -21,6 +21,14 @@
                         </q-item-section>
                         <q-item-section>
                             Schedule
+                        </q-item-section>
+                    </q-item>
+                    <q-item clickable v-ripple to="/calendar" exact>
+                        <q-item-section avatar>
+                            <q-icon name="event" />
+                        </q-item-section>
+                        <q-item-section>
+                            Calendar
                         </q-item-section>
                     </q-item>
                     <q-item clickable v-ripple to="/deadlines" exact>
@@ -104,7 +112,8 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.menu-list .q-item {
-    border-radius: 0 32px 32px 0;
+.top-bar {
+    height: 60px;
+    line-height: 60px;
 }
 </style>
