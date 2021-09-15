@@ -3,13 +3,13 @@
         <q-item-section side top>
             <q-checkbox :value="item.done" @input="checkItem" v-if="item.isTodo" />
             <div class="checkbox-placeholder flex items-center justify-center" v-else>
-                <q-icon name="event" size="sm" />
+                <div class="list-dot"></div>
             </div>
         </q-item-section>
         <q-item-section>
-            <div class="list-title">{{ item.title }}</div>
-            <div class="list-notes">{{ item.notes }}</div>
-            <div class="list-notes" v-if="showDate && item.date != 'unassigned'">{{ hover ? dateAgo(item.dateFrom) : item.dateFrom }}</div>
+            <div :class="'list-title' + (item.isTodo&&item.done?' strikethrough':'')">{{ item.title }}</div>
+            <div :class="'list-notes' + (item.isTodo&&item.done?' strikethrough':'')">{{ item.notes }}</div>
+            <div class="list-notes" v-if="showDate && item.date != 'unassigned'">{{ hover ? item.dateFrom : dateAgo(item.dateFrom)  }}</div>
         </q-item-section>
         
         <q-menu
@@ -104,7 +104,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .list-event {
     border-radius: 25px;
     cursor: pointer;
@@ -127,5 +127,14 @@ export default {
 .list-notes {
     font-size: 0.9rem;
     color: #616161;
+}
+.list-dot {
+    border-radius: 8px;
+    height: 8px;
+    width: 8px;
+    background-color: $primary;
+}
+.strikethrough {
+    text-decoration: line-through;
 }
 </style>

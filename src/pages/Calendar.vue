@@ -10,8 +10,9 @@
                 <div v-for="day in row" :key="day.fullDate" class="calendar-day grid-child">
                     <div class="q-my-xs text-center text-subtitle2 text-grey-7">{{ (day.date == 1 ? CalendarHelper.monthNameRef[day.month] + ' ' : '' ) + day.date }}</div>
                     <template v-if="days[day.fullDate] != null">
-                        <div class="calendar-event" v-for="event in days[day.fullDate]" :key="event.id">
-                            {{event.title}}
+                        <div class="calendar-event text-subtitle2" v-for="event in days[day.fullDate]" :key="event.id">
+                            <div class="event-icon"></div>
+                            <div>{{event.title}}</div>
                         </div>
                     </template>
                 </div>
@@ -123,12 +124,35 @@ export default {
         .calendar-day {
             flex: 1;
             border-top: $border 1px solid;
-
-            .calendar-event {
-                text-align: left;
-                padding-left: 5%;
-            }
         }
+    }
+}
+
+.calendar-event {
+    text-align: left;
+    height: 22px;
+    line-height: 22px;
+    margin-left: 2%;
+    margin-right: 2%;
+    border-radius: 5px;
+    padding-left: 5%;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+
+    &:hover {
+        background-color: #f2f2f2;
+    }
+
+    .event-icon {
+        border-radius: 9px;
+        height: 9px;
+        width: 9px;
+        margin-right: 4px;
+        background-color: $primary;
     }
 }
 </style>

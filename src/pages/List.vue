@@ -280,11 +280,13 @@ export default {
                 d = d.add(1, 'd')
             }
             for (let i of this.list) {
+                // if (i.isTodo && i.done) continue
                 if (i.date == 'unassigned') {
                     this.unassigned.push(i)
                 }
                 else if (datecmp(i.date, this.today) < 0) {
-                    if (!i.isTodo) continue //none-todo events are never pastDue
+                    if (!i.isTodo) continue // none-todo events are not past due
+                    if (i.done) continue // done todos are not past due
                     this.pastDue.push(i)
                 }
                 else {
