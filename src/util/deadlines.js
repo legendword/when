@@ -22,7 +22,7 @@ const deadlinesUtil = {
     },
     getAllActive: async () => {
         const db = await idb.data
-        const allEvents = await db.getAllFromIndex('deadlines', 'dateIndex', IDBKeyRange.lowerBound(moment().format('YYYY-MM-DD HH:mm')))
+        const allEvents = await db.getAllFromIndex('deadlines', 'dateIndex', IDBKeyRange.lowerBound(moment().add(1, 'minute').format('YYYY-MM-DD HH:mm')))
         return allEvents
     },
     getAllInactive: async () => {

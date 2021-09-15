@@ -131,7 +131,7 @@ export default {
     methods: {
         loadHistoryDeadlines() {
             deadlinesUtil.getAllInactive().then(res => {
-                this.historyDeadlines = res
+                this.historyDeadlines = res.reverse()
                 this.historyLoading = false
                 this.showHistory = true
             }).catch(err => {
