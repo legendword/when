@@ -47,7 +47,7 @@
             <div class="text-h6 text-grey-7">Past Deadlines</div>
         </div>
         <transition-group v-if="showHistory" appear enter-active-class="animated fadeIn" leave-active-class="animated fadeOutDown">
-            <div v-for="(ddl, ind) in historyDeadlines" :key="ddl.id" class="q-my-md">
+            <div v-for="ddl in historyDeadlines" :key="ddl.id" class="q-my-md">
                 <q-card>
                     <q-card-section>
                         <div class="row justify-between">
@@ -56,14 +56,16 @@
                                 <span class="q-ml-md text-primary">due {{calendarTime(ddl.dueDate)}}</span>
                             </div>
                             <div>
-                                <q-btn v-if="ddl.completeDate == null" class="q-mr-sm" color="primary" label="Complete" />
+                                <q-btn v-if="ddl.completeDate == null" class="q-mr-sm" color="primary" label="Complete" disable />
                                 <q-btn v-else class="q-mr-sm" flat color="primary" label="Completed" disable />
                                 <q-btn flat round icon="more_horiz">
                                     <q-popup-proxy anchor="bottom right" self="top right">
                                         <q-list>
+                                            <!--
                                             <q-item clickable v-close-popup @click="editDeadline(ind, true)">
                                                 <q-item-section>Edit</q-item-section>
                                             </q-item>
+                                            -->
                                             <q-item clickable v-close-popup @click="removeDeadline(ddl.id, true)">
                                                 <q-item-section class="text-negative">Delete</q-item-section>
                                             </q-item>

@@ -7,7 +7,10 @@
             </div>
         </q-item-section>
         <q-item-section>
-            <div :class="'list-title' + (item.isTodo&&item.done?' strikethrough':'')">{{ item.title }}</div>
+            <div :class="'list-title' + (item.isTodo&&item.done?' strikethrough':'')">
+                <span>{{ item.title }}</span>
+                <span v-if="item.dateFrom.length > 11" class="list-time">{{ item.dateFrom.substr(11) }}</span>
+            </div>
             <div :class="'list-notes' + (item.isTodo&&item.done?' strikethrough':'')">{{ item.notes }}</div>
             <div class="list-notes" v-if="showDate && item.date != 'unassigned'">{{ hover ? item.dateFrom : dateAgo(item.dateFrom)  }}</div>
         </q-item-section>
@@ -114,6 +117,10 @@ export default {
         background-color: $grey-3;
     }
 }
+.list-time {
+    color: $grey-7;
+    margin-left: 8px;
+}
 .list-event-dragging {
     opacity: 0.5;
 }
@@ -133,8 +140,5 @@ export default {
     height: 8px;
     width: 8px;
     background-color: $primary;
-}
-.strikethrough {
-    text-decoration: line-through;
 }
 </style>

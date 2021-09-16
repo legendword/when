@@ -6,6 +6,7 @@ class CalendarHelper {
 
     constructor() {
         this.cur = moment();
+        this.today = this.cur.format('YYYY-MM-DD');
     }
 
     monthLayout() {

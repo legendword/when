@@ -8,11 +8,15 @@
         <div class="calendar-main">
             <div v-for="(row, ind) in monthLayout" :key="ind" class="calendar-row">
                 <div v-for="day in row" :key="day.fullDate" class="calendar-day grid-child">
-                    <div class="q-my-xs text-center text-subtitle2 text-grey-7">{{ (day.date == 1 ? CalendarHelper.monthNameRef[day.month] + ' ' : '' ) + day.date }}</div>
+                    <div class="calendar-date text-center text-subtitle2 text-grey-7">
+                        <div v-if="day.fullDate == helper.today" class="today">{{ day.date }}</div>
+                        <div v-else>{{ (day.date == 1 ? CalendarHelper.monthNameRef[day.month] + ' ' : '' ) + day.date }}</div>
+                    </div>
                     <template v-if="days[day.fullDate] != null">
-                        <div class="calendar-event text-subtitle2" v-for="event in days[day.fullDate]" :key="event.id">
-                            <div class="event-icon"></div>
-                            <div>{{event.title}}</div>
+                        <div class="calendar-event text-subtitle2" v-for="event in days[day.fullDate]" :key="event.id" :title="event.title + (event.dateFrom.length > 10 ? (' ' + event.dateFrom.substr(11)) : '')">
+                            <div :class="'event-icon ' + (event.isTodo ? 'todo' : 'event')"></div>
+                            <div :class="'event-title ellipsis' + ((event.isTodo && event.done) ? ' strikethrough' : '')">{{event.title}}</div>
+                            <div v-if="event.dateFrom.length > 10" class="event-time text-grey-7">{{event.dateFrom.substr(11)}}</div>
                         </div>
                     </template>
                 </div>
@@ -45,7 +49,7 @@ export default {
                     this.unassigned.push(i)
                 }
                 else {
-                    let dateStr = i.date.substr(0, 10)
+                    let dateStr = i.date.substr(0, 10);
                     if (this.days[dateStr]) {
                         this.days[dateStr].push(i);
                     }
@@ -128,6 +132,26 @@ export default {
     }
 }
 
+.calendar-date {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+
+    height: 22px;
+    line-height: 22px;
+    margin: 4px 0;
+
+    .today {
+        width: 24px;
+        height: 24px;
+        line-height: 24px;
+        border-radius: 24px;
+        margin: 0 0;
+        background-color: $primary;
+        color: #ffffff;
+    }
+}
+
 .calendar-event {
     text-align: left;
     height: 22px;
@@ -151,8 +175,29 @@ export default {
         border-radius: 9px;
         height: 9px;
         width: 9px;
-        margin-right: 4px;
+        margin-right: 3%;
         background-color: $primary;
+
+        &.todo {
+            background-color: $secondary;
+        }
+        &.event {
+            background-color: $primary;
+        }
+    }
+
+    .event-time {
+        margin-left: 3%;
+    }
+}
+
+@media (max-width: 768px) {
+    .calendar-event {
+        margin: 0;
+        padding-left: 2px;
+    }
+    .event-time {
+        display: none;
     }
 }
 </style>
