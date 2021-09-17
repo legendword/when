@@ -323,7 +323,7 @@ export default {
                 })
             }
 
-            //console.log(this.unassigned, this.pastDue, this.closeDays, this.days)
+            console.log(this.unassigned, this.pastDue, this.closeDays, this.days)
         },
         loadList() {
             listUtil.getAllEvents().then(res => {

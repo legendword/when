@@ -17,19 +17,54 @@
                             <div :class="'event-icon ' + (event.isTodo ? 'todo' : 'event')"></div>
                             <div :class="'event-title ellipsis' + ((event.isTodo && event.done) ? ' strikethrough' : '')">{{event.title}}</div>
                             <div v-if="event.dateFrom.length > 10" class="event-time text-grey-7">{{event.dateFrom.substr(11)}}</div>
+
+                            <q-menu touch-position context-menu>
+                                <q-list dense style="min-width: 100px">
+                                    <q-item clickable v-close-popup @click="moveEvent(event, -1)">
+                                        <q-item-section>Move to Previous Day</q-item-section>
+                                    </q-item>
+                                    <q-item clickable v-close-popup @click="moveEvent(event, 1)">
+                                        <q-item-section>Move to Next Day</q-item-section>
+                                    </q-item>
+                                    <q-separator />
+                                    <q-item clickable v-close-popup @click="reOrderEvent(event, -1)">
+                                        <q-item-section>Move Up</q-item-section>
+                                    </q-item>
+                                    <q-item clickable v-close-popup @click="reOrderEvent(event, 1)">
+                                        <q-item-section>Move Down</q-item-section>
+                                    </q-item>
+                                    <q-separator />
+                                    <q-item clickable v-close-popup @click="editEvent(event)">
+                                        <q-item-section class="text-primary">Edit Event</q-item-section>
+                                    </q-item>
+                                    <q-item clickable v-close-popup @click="removeEvent(event)">
+                                        <q-item-section class="text-negative">Delete Event</q-item-section>
+                                    </q-item>
+                                </q-list>
+                            </q-menu>
                         </div>
                     </template>
                 </div>
             </div>
         </div>
+        <q-dialog v-model="editEventDialog">
+            <q-card style="width: 1000px; max-width: 90vw;">
+                <edit-event :event="editEventObj" :show="editEventDialog" @close="editEventDialog = false" />
+            </q-card>
+        </q-dialog>
     </q-page>
 </template>
 
 <script>
 import listUtil from '../util/list'
 import CalendarHelper from '../util/calendar'
+import { offsetDate } from 'src/util/date'
+import EditEvent from '../components/EditEvent.vue'
 export default {
     name: 'Calendar',
+    components: {
+        EditEvent
+    },
     data() {
         return {
             list: [],
@@ -37,11 +72,41 @@ export default {
             days: {},
             monthLayout: [],
             helper: null,
-            CalendarHelper: CalendarHelper
+            CalendarHelper: CalendarHelper,
+            editEventDialog: false,
+            editEventObj: {}
         }
     },
     methods: {
-        sortList() { //sort list content into unassigned, pastDue, and days
+        editEvent(evt) {
+            console.log({...evt})
+            this.editEventObj = evt
+            this.editEventDialog = true
+        },
+        reOrderEvent(evt, offset) {
+            listUtil.reOrderEvent(evt, offset).then(() => {
+                this.loadList()
+            }).catch(err => {
+                console.error(err)
+            })
+        },
+        moveEvent(evt, dayOffset) {
+            let dest = offsetDate(evt.date, dayOffset)
+            console.log(evt, dayOffset, dest)
+            listUtil.moveEvent(evt, dest).then(() => {
+                this.loadList()
+            }).catch(err => {
+                console.error(err)
+            })
+        },
+        removeEvent(evt) {
+            listUtil.deleteEvent(evt).then(() => {
+                this.loadList()
+            }).catch(err => {
+                console.error(err)
+            })
+        },
+        sortList() { //sort list content into days
             this.unassigned = []
             this.days = {};
             for (let i of this.list) {

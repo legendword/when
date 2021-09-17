@@ -29,14 +29,6 @@
                 </q-card>
             </div>
         </section>
-        <section class="q-my-xl">
-            <div class="text-h5 q-mb-md">Known Issues</div>
-            <q-list bordered separator class="q-mx-lg">
-                <q-item>
-                    <q-item-section>Multi-day events not displaying properly.</q-item-section>
-                </q-item>
-            </q-list>
-        </section>
     </q-page>
 </template>
 

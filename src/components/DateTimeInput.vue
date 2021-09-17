@@ -114,7 +114,7 @@ export default {
             this.$emit(this.active ? 'focus' : 'blur')
         },
         valueChange(val) {
-            console.log(val)
+            console.log('valueChange', val)
             this.$emit('input', val)
         },
         selectAll(id) {

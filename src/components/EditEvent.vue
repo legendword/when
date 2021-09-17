@@ -9,12 +9,15 @@
                 <q-toggle v-model="value.isTodo" label="Todo" :class="value.isTodo ? 'toggle-active' : 'toggle-inactive'" />
                 <q-toggle v-model="value.fullDay" label="Full Day" :class="value.fullDay ? 'toggle-active' : 'toggle-inactive'" />
             </div>
-            <div class="q-mb-md">
-                <date-time-input v-model="value.dateFrom" :label="value.isTodo ? 'Date' : 'From'" :date-only="value.fullDay" @focus="dateFocus('dateFrom')" @blur="inFocus.dateFrom = false" ref="dateFrom" />
-            </div>
-            <div class="q-mb-md" v-show="!value.isTodo">
-                <date-time-input v-model="value.dateTo" label="To" :date-only="value.fullDay" @focus="dateFocus('dateTo')" @blur="inFocus.dateTo = false" ref="dateTo" />
-            </div>
+            <template v-if="valueInitialized">
+                <div class="q-mb-md">
+                    <date-time-input :date-only="value.fullDay" v-model="value.dateFrom" :label="value.isTodo ? 'Date' : 'From'" @focus="dateFocus('dateFrom')" @blur="inFocus.dateFrom = false" ref="dateFrom" />
+                </div>
+                <div class="q-mb-md" v-show="!value.isTodo">
+                    <date-time-input :date-only="value.fullDay" v-model="value.dateTo" label="To" @focus="dateFocus('dateTo')" @blur="inFocus.dateTo = false" ref="dateTo" />
+                </div>
+            </template>
+            
             <div class="q-mb-md">
                 <q-input borderless v-model="value.notes" label="Notes" autogrow @focus="inFocus.notes = true" @blur="inFocus.notes = false" ref="notes">
                     <template v-slot:before>
@@ -51,6 +54,7 @@ export default {
                 dateTo: null,
                 notes: ''
             },
+            valueInitialized: false,
             inFocus: {
                 notes: false,
                 dateFrom: false,
@@ -59,8 +63,8 @@ export default {
         }
     },
     mounted() {
-        //console.log('EditEvent mounted')
         this.value = {...this.event}
+        this.valueInitialized = true
         this.$refs.title.focus()
     },
     methods: {
