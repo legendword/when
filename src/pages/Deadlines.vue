@@ -84,16 +84,8 @@
                 </q-card>
             </div>
         </transition-group>
-        <q-page-sticky position="bottom-right" :offset="[25, 25]">
-            <q-btn fab icon="add" color="primary" @click="addDialog = true" />
-        </q-page-sticky>
-        <q-dialog v-model="addDialog">
-            <q-card style="width: 1000px; max-width: 90vw;">
-                <new-deadline @close="addDialogClose" />
-            </q-card>
-        </q-dialog>
         <q-dialog v-model="editDialog">
-            <q-card style="width: 1000px; max-width: 90vw;">
+            <q-card style="width: 800px; max-width: 90vw;">
                 <edit-deadline :ddl="editddl" @close="editDialogClose" />
             </q-card>
         </q-dialog>
@@ -105,13 +97,11 @@ import moment from 'moment'
 import { calendarTime } from '../util/date'
 import deadlinesUtil from '../util/deadlines'
 import DeadlineProgress from '../components/DeadlineProgress.vue'
-import NewDeadline from '../components/NewDeadline.vue'
 import EditDeadline from '../components/EditDeadline.vue'
 export default {
     name: 'Deadlines',
     components: {
         DeadlineProgress,
-        NewDeadline,
         EditDeadline
     },
     data() {
@@ -120,7 +110,6 @@ export default {
             timer: null,
             timeProgress: {},
             dueStr: {},
-            addDialog: false,
             editDialog: false,
             editddl: {},
             editIsHistory: false,

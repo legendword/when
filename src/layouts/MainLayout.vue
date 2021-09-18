@@ -8,6 +8,8 @@
                 <q-toolbar-title>
                     {{ pageTitle }}
                 </q-toolbar-title>
+
+                <q-btn label="Create" icon="add" @click="newEventDialog = true" color="primary" flat />
             </q-toolbar>
         </q-header>
 
@@ -64,16 +66,26 @@
             <router-view />
         </q-page-container>
 
+        <q-dialog v-model="newEventDialog">
+            <q-card style="width: 700px; max-width: 95vw;">
+                <new-event :show="newEventDialog" @close="newEventDialog = false" />
+            </q-card>
+        </q-dialog>
     </q-layout>
 </template>
 
 <script>
+import NewEvent from '../components/NewEvent.vue'
 export default {
     name: 'MainLayout',
+    components: {
+        NewEvent
+    },
     data () {
         return {
             menu: true,
-            pageHiddenProp: 'hidden'
+            pageHiddenProp: 'hidden',
+            newEventDialog: false
         }
     },
     computed: {

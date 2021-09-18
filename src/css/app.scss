@@ -1,5 +1,15 @@
 // app global css in SCSS form
 
+// overwrite quasar field styles
+.time-input-wrapper, .date-input-wrapper {
+    .q-field__control:not(.q-textarea .q-field__control), .q-field__marginal {
+        height: 40px !important;
+    }
+    .q-field__append {
+        padding-left: 0 !important;
+    }
+}
+
 // custom colors
 .text-transparent {
     color: transparent !important;
