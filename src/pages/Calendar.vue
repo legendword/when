@@ -13,10 +13,43 @@
                         <div v-else>{{ (day.date == 1 ? CalendarHelper.monthNameRef[day.month] + ' ' : '' ) + day.date }}</div>
                     </div>
                     <template v-if="days[day.fullDate] != null">
-                        <div class="calendar-event text-subtitle2" v-for="event in days[day.fullDate]" :key="event.id" :title="event.title + (event.dateFrom.length > 10 ? (' ' + event.dateFrom.substr(11)) : '')">
-                            <div :class="'event-icon ' + (event.isTodo ? 'todo' : 'event')"></div>
-                            <div :class="'event-title ellipsis' + ((event.isTodo && event.done) ? ' strikethrough' : '')">{{event.title}}</div>
-                            <div v-if="event.dateFrom.length > 10" class="event-time text-grey-7">{{event.dateFrom.substr(11)}}</div>
+                        <div :class="'calendar-event text-subtitle2' + (activeEvent == event.id ? ' shadow-5' : '')" v-for="event in days[day.fullDate]" :key="event.id" :title="event.title + (!event.fullDay ? (' ' + event.dateFrom.substr(11)) : '')">
+                            <div :class="'event-icon ' + (event.isTodo ? 'bg-todo' : 'bg-event')"></div>
+                            <div :class="'event-title ellipsis' + ((event.isTodo && event.done) ? ' strikethrough' : '')">{{ event.title }}</div>
+                            <div v-if="!event.fullDay" class="event-time text-grey-7">{{ event.dateFrom.substr(11) }}</div>
+
+                            <q-popup-proxy @before-show="activeEvent = event.id" @before-hide="activeEvent = null">
+                                <q-card style="min-width: 400px;">
+                                    <q-bar :class="'q-pl-md text-white' + (event.isTodo ? ' bg-todo' : ' bg-event')">
+                                        <div class="text-body2 text-weight-medium">{{ event.isTodo ? 'Todo' : 'Event' }}</div>
+                                        <q-space />
+                                        <q-btn @click="confirmRemoveEvent(event)" dense flat icon="delete" />
+                                        <q-btn @click="editEvent(event)" dense flat icon="edit" v-close-popup />
+                                        <q-btn dense flat icon="close" v-close-popup />
+                                    </q-bar>
+                                    <q-card-section>
+                                        <div class="text-h6">{{ event.title }}</div>
+                                        <template v-if="event.dateTo && event.dateTo.substr(0,10) != event.dateFrom.substr(0,10)"> <!-- multi-day events -->
+                                            <div class="text-body2">
+                                                <span style="display: inline-block; width: 42px;">From </span>
+                                                <span>{{ humanWeekDate(event.dateFrom) }}</span>
+                                                <span v-if="!event.fullDay" class="text-grey-7"> {{ event.dateFrom.substr(11) }}</span>
+                                            </div>
+                                            <div class="text-body2">
+                                                <span style="display: inline-block; width: 42px;">To </span>
+                                                <span>{{ humanWeekDate(event.dateTo) }}</span>
+                                                <span v-if="!event.fullDay" class="text-grey-7"> {{ event.dateTo.substr(11) }}</span>
+                                            </div>
+                                        </template>
+                                        <div class="text-body2" v-else>
+                                            <span>{{ humanWeekDate(event.dateFrom) }}</span>
+                                            <span v-if="!event.fullDay" class="text-grey-7"> {{ event.dateFrom.substr(11) }}</span>
+                                            <span v-if="!event.fullDay && event.dateTo" class="text-grey-7"> - {{ event.dateTo.substr(11) }}</span>
+                                        </div>
+                                        <div class="q-mt-md event-notes" v-if="event.notes.length > 0">{{ event.notes }}</div>
+                                    </q-card-section>
+                                </q-card>
+                            </q-popup-proxy>
 
                             <q-menu touch-position context-menu>
                                 <q-list dense style="min-width: 100px">
@@ -58,8 +91,9 @@
 <script>
 import listUtil from '../util/list'
 import CalendarHelper from '../util/calendar'
-import { offsetDate } from 'src/util/date'
+import { humanWeekDate, offsetDate } from 'src/util/date'
 import EditEvent from '../components/EditEvent.vue'
+import moment from 'moment'
 export default {
     name: 'Calendar',
     components: {
@@ -73,8 +107,10 @@ export default {
             monthLayout: [],
             helper: null,
             CalendarHelper: CalendarHelper,
+            humanWeekDate: humanWeekDate,
             editEventDialog: false,
-            editEventObj: {}
+            editEventObj: {},
+            activeEvent: null
         }
     },
     methods: {
@@ -106,9 +142,25 @@ export default {
                 console.error(err)
             })
         },
+        confirmRemoveEvent(evt) {
+            this.$q.dialog({
+                title: 'Confirm Delete',
+                message: 'Would you like to delete this event?',
+                cancel: true,
+                persistent: true,
+                ok: {
+                    color: 'negative',
+                    label: 'Delete',
+                    flat: true
+                }
+            }).onOk(() => {
+                this.removeEvent(evt)
+            })
+        },
         sortList() { //sort list content into days
-            this.unassigned = []
+            this.unassigned = [];
             this.days = {};
+            let multiDayEvents = [];
             for (let i of this.list) {
                 if (i.date == 'unassigned') {
                     this.unassigned.push(i)
@@ -121,8 +173,12 @@ export default {
                     else {
                         this.days[dateStr] = [i];
                     }
+                    if (i.dateTo && i.dateTo.substr(0, 10) != dateStr) {
+                        multiDayEvents.push(i);
+                    }
                 }
             }
+            // sort arrays by order
             this.unassigned.sort((a, b) => {
                 return a.order - b.order
             })
@@ -131,8 +187,23 @@ export default {
                     return a.order - b.order
                 })
             }
+            // multi-day events parsing
+            for (let i of multiDayEvents) {
+                let jt = i.dateFrom.substr(0, 10);
+                let j = moment(jt, 'YYYY-MM-DD');
+                while (jt != i.dateTo.substr(0, 10)) {
+                    j.add(1, 'day');
+                    jt = j.format('YYYY-MM-DD');
+                    if (this.days[jt]) {
+                        this.days[jt].unshift(i);
+                    }
+                    else {
+                        this.days[jt] = [i];
+                    }
+                }
+            }
 
-            //console.log(this.unassigned, this.pastDue, this.closeDays, this.days)
+            //console.log(this.unassigned, this.days)
         },
         loadList() {
             listUtil.getAllEvents().then(res => {
@@ -148,7 +219,30 @@ export default {
         this.helper = new CalendarHelper()
         this.monthLayout = this.helper.monthLayout()
         this.loadList()
-    }
+    },
+    watch: {
+        newEvent(val) {
+            if (val) {
+                this.loadList()
+                this.$store.commit('data/newEvent', false)
+            }
+        },
+        pageVisible(val) {
+            if (val) {
+                this.helper = new CalendarHelper()
+                this.monthLayout = this.helper.monthLayout()
+                this.sortList()
+            }
+        }
+    },
+    computed: {
+        newEvent() {
+            return this.$store.state.data.newEvent
+        },
+        pageVisible() {
+            return this.$store.state.layout.pageVisible
+        }
+    },
 }
 </script>
 
@@ -241,14 +335,6 @@ export default {
         height: 9px;
         width: 9px;
         margin-right: 3%;
-        background-color: $primary;
-
-        &.todo {
-            background-color: $secondary;
-        }
-        &.event {
-            background-color: $primary;
-        }
     }
 
     .event-time {
@@ -264,5 +350,9 @@ export default {
     .event-time {
         display: none;
     }
+}
+
+.event-notes {
+    white-space: pre-wrap;
 }
 </style>

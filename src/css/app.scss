@@ -4,6 +4,24 @@
 .text-transparent {
     color: transparent !important;
 }
+.text-event {
+    color: $primary;
+}
+.bg-event {
+    background: $primary;
+}
+.text-todo {
+    color: $secondary;
+}
+.bg-todo {
+    background: $secondary;
+}
+.text-deadline {
+    color: $deadline;
+}
+.bg-deadline {
+    background: $deadline;
+}
 
 .strikethrough {
     text-decoration: line-through;

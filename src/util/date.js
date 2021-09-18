@@ -47,6 +47,9 @@ export const dayOfWeek = function(date) {
     if (date == null) return moment().format('dddd')
     return moment(date).format('dddd')
 }
+export const humanWeekDate = function(date, showYear = false) {
+    return moment(date).format(showYear ? 'dddd, MMMM D, YYYY' : 'dddd, MMMM D');
+}
 export const humanDate = function(date) {
     //turns xxxx-xx-xx into a more human readable format (Month Day, Year)
     /*
