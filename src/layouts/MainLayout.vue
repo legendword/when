@@ -46,6 +46,17 @@
                             <q-item-section side>
                                 {{ category.total }}
                             </q-item-section>
+
+                            <q-menu touch-position context-menu>
+                                <q-list dense style="min-width: 100px">
+                                    <q-item clickable v-close-popup @click="editCategory" disable>
+                                        <q-item-section>Edit</q-item-section>
+                                    </q-item>
+                                    <q-item clickable v-close-popup @click="confirmRemoveCategory(category.name)">
+                                        <q-item-section class="text-negative">Delete</q-item-section>
+                                    </q-item>
+                                </q-list>
+                            </q-menu>
                         </q-item>
                     </q-list>
                     <div v-else-if="categoriesLoaded" class="text-center text-grey-8 text-caption q-my-md">
@@ -132,6 +143,31 @@ export default {
                 this.getCategories();
             }).catch(err => {
                 console.error(err);
+            })
+        },
+        editCategory() {
+            // #todo
+        },
+        reomveCategory(name) {
+            categoryUtil.delete(name).then(() => {
+                this.$store.commit('data/change')
+            }).catch(err => {
+                console.error(err)
+            })
+        },
+        confirmRemoveCategory(name) {
+            this.$q.dialog({
+                title: 'Confirm Delete',
+                message: `Would you like to delete ${name}? The items under this category will lose their category set.`,
+                cancel: true,
+                persistent: true,
+                ok: {
+                    color: 'negative',
+                    label: 'Delete',
+                    flat: true
+                }
+            }).onOk(() => {
+                this.reomveCategory(name)
             })
         },
         applyListener() {

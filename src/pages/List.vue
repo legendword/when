@@ -253,7 +253,7 @@ export default {
         },
         removeEvent(evt) {
             listUtil.deleteEvent(evt).then(() => {
-                this.loadList()
+                this.$store.commit('data/change')
             }).catch(err => {
                 console.error(err)
             })

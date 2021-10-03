@@ -45,6 +45,9 @@
         <q-btn v-if="!showHistory" flat label="View Past Deadlines" color="grey-7" class="full-width" :loading="historyLoading" @click="viewHistory" ref="historyLoadBtn" />
         <div v-else class="q-mt-lg q-mb-md">
             <div class="text-h6 text-grey-7">Past Deadlines</div>
+            <div v-if="deadlines.length == 0">
+                <div class="text-subtitle1 q-my-md text-grey-7">No past deadlines.</div>
+            </div>
         </div>
         <transition-group v-if="showHistory" appear enter-active-class="animated fadeIn" leave-active-class="animated fadeOutDown">
             <div v-for="ddl in historyDeadlines" :key="ddl.id" class="q-my-md">

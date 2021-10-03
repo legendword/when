@@ -2,7 +2,7 @@
     <div class="q-py-lg q-px-xl">
         <div class="full-width">
             <div class="q-mb-md">
-                <q-input autofocus v-model="value.title" hide-bottom-space placeholder="Title" ref="title" input-class="text-input" />
+                <q-input autofocus v-model="universalValue.title" hide-bottom-space placeholder="Title" ref="title" input-class="text-input" />
             </div>
             <div class="q-my-md">
                 <q-chip v-for="category in categories" :key="category.name" clickable :outline="universalValue.category != category.name" :style="universalValue.category != category.name ? {color: category.color} : {backgroundColor: category.color, color: textColor(category.color)}" @click="universalValue.category = universalValue.category == category.name ? null : category.name">
@@ -195,6 +195,7 @@ export default {
                 this.value[i] = this.universalValue[i];
                 this.deadlineValue[i] = this.universalValue[i];
             }
+            console.log({...this.universalValue}, {...this.value})
             if (this.type == 'deadline') {
                 // #todo
             }
