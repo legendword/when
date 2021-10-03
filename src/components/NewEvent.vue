@@ -103,6 +103,7 @@ import DateInput from './DateInput.vue'
 import TimeInput from './TimeInput.vue'
 import listUtil from '../util/list'
 import { textColor } from '../util/color'
+import deadlinesUtil from 'src/util/deadlines'
 export default {
     name: 'NewEvent',
     props: {
@@ -137,6 +138,7 @@ export default {
                 dateTo: tomorrowStr(),
                 timeFrom: nowStr(),
                 timeTo: nowStr(),
+                dueDate: '', // calculated at submit()
                 progress: 0,
                 completeDate: null
             },
@@ -151,7 +153,7 @@ export default {
         show: {
             handler(val) {
                 if (val) {
-                    if (this.$route.path == '/deadline') {
+                    if (this.$route.path == '/deadlines') {
                         this.type = 'deadline'
                     }
                 }
@@ -195,9 +197,26 @@ export default {
                 this.value[i] = this.universalValue[i];
                 this.deadlineValue[i] = this.universalValue[i];
             }
-            console.log({...this.universalValue}, {...this.value})
             if (this.type == 'deadline') {
-                // #todo
+                if (this.deadlineValue.dateTo < this.deadlineValue.dateFrom) {
+                    this.$q.notify({
+                        type: 'negative',
+                        message: 'Invalid date range.',
+                        timeout: 2500
+                    })
+                    return
+                }
+                let ddl = {
+                    ...this.deadlineValue,
+                    dueDate: this.deadlineValue.dateTo + ' ' + this.deadlineValue.timeTo
+                }
+                deadlinesUtil.add(ddl).then(() => {
+                    this.$store.commit('data/change')
+                    this.$emit('close')
+                    this.clear()
+                }).catch(err => {
+                    console.error('addDeadline error: ', err)
+                })
             }
             else {
                 this.value.isTodo = this.type == 'todo'
@@ -258,12 +277,9 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .text-input {
     font-size: 1rem;
-}
-.toggle-inactive .q-toggle__label {
-    color: #616161;
 }
 .ne-tab-panel {
     padding: 14px 0 0 0;

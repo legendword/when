@@ -132,7 +132,7 @@ const listUtil = {
     },
     editEvent: async (oldEvent, newEvent) => {
         const db = await idb.data
-        const ts = db.transaction(['events', 'maxOrder'], 'readwrite')
+        const ts = db.transaction(['events', 'maxOrder', 'categories'], 'readwrite')
         newEvent.date = newEvent.dateFrom ? newEvent.dateFrom.substr(0, 10) : 'unassigned'
         if (oldEvent.date == newEvent.date) {
             ts.objectStore('events').put(newEvent)

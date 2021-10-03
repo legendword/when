@@ -54,7 +54,7 @@
         </q-page-sticky>
         -->
         <q-dialog v-model="editEventDialog">
-            <q-card style="width: 800px; max-width: 90vw;">
+            <q-card style="width: 700px; max-width: 95vw;">
                 <edit-event :event="editEventObj" :show="editEventDialog" @close="editEventDialog = false" />
             </q-card>
         </q-dialog>

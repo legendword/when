@@ -148,6 +148,7 @@ export default {
             categoryUtil.getAll().then(res => {
                 this.categories = res;
                 this.categoriesLoaded = true;
+                this.$store.commit('data/categories', res);
             }).catch(err => {
                 console.error(err);
             })

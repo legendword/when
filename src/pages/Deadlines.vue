@@ -24,7 +24,7 @@
                                             <q-item clickable v-close-popup @click="editDeadline(ind)">
                                                 <q-item-section>Edit</q-item-section>
                                             </q-item>
-                                            <q-item clickable v-close-popup @click="removeDeadline(ddl.id)">
+                                            <q-item clickable v-close-popup @click="removeDeadline(ddl)">
                                                 <q-item-section class="text-negative">Delete</q-item-section>
                                             </q-item>
                                         </q-list>
@@ -69,7 +69,7 @@
                                                 <q-item-section>Edit</q-item-section>
                                             </q-item>
                                             -->
-                                            <q-item clickable v-close-popup @click="removeDeadline(ddl.id, true)">
+                                            <q-item clickable v-close-popup @click="removeDeadline(ddl, true)">
                                                 <q-item-section class="text-negative">Delete</q-item-section>
                                             </q-item>
                                         </q-list>
@@ -150,8 +150,8 @@ export default {
             this.editDialog = true
             this.editIsHistory = isHistory
         },
-        removeDeadline(id, isHistory = false) {
-            deadlinesUtil.remove(id).then(() => {
+        removeDeadline(ddl, isHistory = false) {
+            deadlinesUtil.remove(ddl).then(() => {
                 if (isHistory) this.loadHistoryDeadlines()
                 else this.loadDeadlines()
             }).catch(err => {
@@ -203,6 +203,9 @@ export default {
         }
     },
     watch: {
+        dataIteration() {
+            this.loadDeadlines()
+        },
         pageVisible(val) {
             if (val) {
                 this.loadDeadlines()
@@ -210,6 +213,9 @@ export default {
         }
     },
     computed: {
+        dataIteration() {
+            return this.$store.state.data.iteration
+        },
         pageVisible() {
             return this.$store.state.layout.pageVisible
         }
