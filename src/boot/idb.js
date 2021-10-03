@@ -9,6 +9,7 @@ export const idb = {
       if (oldVersion <= 0) {
         const events = db.createObjectStore('events', { keyPath: 'id', autoIncrement: true })
         events.createIndex('dateIndex', 'date')
+        db.createObjectStore('categories', { keyPath: 'name' })
         db.createObjectStore('maxOrder')
         const deadlines = db.createObjectStore('deadlines', { keyPath: 'id', autoIncrement: true })
         deadlines.createIndex('dateIndex', 'dueDate')
