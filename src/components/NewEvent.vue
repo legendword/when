@@ -5,7 +5,7 @@
                 <q-input autofocus v-model="universalValue.title" hide-bottom-space placeholder="Title" ref="title" input-class="text-input" />
             </div>
             <div class="q-my-md">
-                <q-chip v-for="category in categories" :key="category.name" clickable :outline="universalValue.category != category.name" :style="universalValue.category != category.name ? {color: category.color} : {backgroundColor: category.color, color: textColor(category.color)}" @click="universalValue.category = universalValue.category == category.name ? null : category.name">
+                <q-chip v-for="category in categories" :key="category.id" clickable :outline="universalValue.category != category.id" :style="universalValue.category != category.id ? {color: category.color} : {backgroundColor: category.color, color: textColor(category.color)}" @click="universalValue.category = universalValue.category == category.id ? null : category.id">
                     {{ category.name }}
                 </q-chip>
             </div>

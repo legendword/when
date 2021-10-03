@@ -39,7 +39,7 @@
                         </div>
                     </div>
                     <q-list dense padding class="menu-list" v-if="categories.length > 0">
-                        <q-item v-for="category in categories" :key="category.name" clickable v-ripple :style="{color: category.color}" class="text-weight-medium">
+                        <q-item v-for="category in categories" :key="category.id" clickable v-ripple :style="{color: category.color}" class="text-weight-medium">
                             <q-item-section>
                                 {{ category.name }}
                             </q-item-section>
@@ -49,14 +49,25 @@
 
                             <q-menu touch-position context-menu>
                                 <q-list dense style="min-width: 100px">
-                                    <q-item clickable v-close-popup @click="editCategory" disable>
-                                        <q-item-section>Edit</q-item-section>
+                                    <q-item clickable v-close-popup @click="startEditCategory(category)">
+                                        <q-item-section class="text-primary">Edit</q-item-section>
                                     </q-item>
-                                    <q-item clickable v-close-popup @click="confirmRemoveCategory(category.name)">
+                                    <q-item clickable v-close-popup @click="confirmRemoveCategory(category)">
                                         <q-item-section class="text-negative">Delete</q-item-section>
                                     </q-item>
                                 </q-list>
                             </q-menu>
+
+                            <q-popup-proxy :value="editCategory.id == category.id">
+                                <q-card class="q-pa-sm">
+                                    <q-input class="category-input-wrapper" autofocus v-model="editCategory.name" hide-bottom-space placeholder="Category Name" />
+                                    <q-color class="q-my-md" v-model="editCategory.color" format-model="hex" default-view="palette" :palette="categoryColorPalette" />
+                                    <div class="row">
+                                        <q-space />
+                                        <q-btn :style="{color: editCategory.color }" flat label="Save" @click="submitEditCategory" v-close-popup />
+                                    </div>
+                                </q-card>
+                            </q-popup-proxy>
                         </q-item>
                     </q-list>
                     <div v-else-if="categoriesLoaded" class="text-center text-grey-8 text-caption q-my-md">
@@ -113,6 +124,11 @@ export default {
                 name: '',
                 color: categoryColorPalette[Math.floor(Math.random() * categoryColorPalette.length)]
             },
+            editCategory: {
+                id: null,
+                name: '',
+                color: ''
+            },
             categoryColorPalette
         }
     },
@@ -122,7 +138,8 @@ export default {
         }
     },
     watch: {
-        dataIteration() {
+        dataIteration(val) {
+            console.log('MainLayout dataIteration', val)
             this.getCategories()
         }
     },
@@ -145,20 +162,30 @@ export default {
                 console.error(err);
             })
         },
-        editCategory() {
-            // #todo
+        submitEditCategory() {
+            categoryUtil.edit(this.editCategory.id, {...this.editCategory}).then(() => {
+                this.editCategory.id = null;
+                this.getCategories();
+            }).catch(err => {
+                console.error(err);
+            })
         },
-        reomveCategory(name) {
-            categoryUtil.delete(name).then(() => {
+        startEditCategory(ct) {
+            this.editCategory = {
+                ...ct
+            };
+        },
+        removeCategory(id) {
+            categoryUtil.delete(id).then(() => {
                 this.$store.commit('data/change')
             }).catch(err => {
                 console.error(err)
             })
         },
-        confirmRemoveCategory(name) {
+        confirmRemoveCategory(ct) {
             this.$q.dialog({
                 title: 'Confirm Delete',
-                message: `Would you like to delete ${name}? The items under this category will lose their category set.`,
+                message: `Would you like to delete ${ct.name}? The items under this category will lose their category set.`,
                 cancel: true,
                 persistent: true,
                 ok: {
@@ -167,7 +194,7 @@ export default {
                     flat: true
                 }
             }).onOk(() => {
-                this.reomveCategory(name)
+                this.removeCategory(ct.id)
             })
         },
         applyListener() {

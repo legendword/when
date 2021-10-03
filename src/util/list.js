@@ -115,8 +115,10 @@ const listUtil = {
         const db = await idb.data
         if (event.category != null) {
             let ct = await db.get('categories', event.category)
-            ct.total -= 1
-            await db.put('categories', ct)
+            if (ct != undefined) {
+                ct.total -= 1
+                await db.put('categories', ct)
+            }
         }
         return db.delete('events', event.id)
     },

@@ -330,7 +330,8 @@ export default {
         }
     },
     watch: {
-        dataIteration() {
+        dataIteration(val) {
+            console.log('List dataIteration', val)
             this.loadList()
         },
         pageVisible(val) {
