@@ -217,9 +217,6 @@ export default {
     },
     beforeDestroy() {
         clearInterval(this.timer)
-    },
-    created() {
-        this.$store.commit('layout/pageTitle', 'Deadlines')
     }
 }
 </script>

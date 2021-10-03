@@ -89,7 +89,7 @@ export default {
         submit() {
             listUtil.editEvent(this.event, this.value).then(() => {
                 console.log('editEvent success')
-                this.$store.commit('data/newEvent', true) //this store mutation is for refreshing the list view, so mutation name does not matter
+                this.$store.commit('data/change')
                 this.$emit('close')
             }).catch(err => {
                 console.error('editEvent error: ', err)

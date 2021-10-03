@@ -1,8 +1,13 @@
 <template>
     <div class="q-py-lg q-px-xl">
         <div class="full-width">
-            <div class="q-mb-lg">
+            <div class="q-mb-md">
                 <q-input autofocus v-model="value.title" hide-bottom-space placeholder="Title" ref="title" input-class="text-input" />
+            </div>
+            <div class="q-my-md">
+                <q-chip v-for="category in categories" :key="category.name" clickable :outline="universalValue.category != category.name" :style="universalValue.category != category.name ? {color: category.color} : {backgroundColor: category.color, color: textColor(category.color)}" @click="universalValue.category = universalValue.category == category.name ? null : category.name">
+                    {{ category.name }}
+                </q-chip>
             </div>
             <q-tabs v-model="type" dense class="text-grey" :active-color="type" :indicator-color="type" align="left">
                 <q-tab name="event" label="Event" />
@@ -97,10 +102,12 @@ import { nowStr, todayStr, tomorrowStr } from 'src/util/date'
 import DateInput from './DateInput.vue'
 import TimeInput from './TimeInput.vue'
 import listUtil from '../util/list'
+import { textColor } from '../util/color'
 export default {
     name: 'NewEvent',
     props: {
-        show: Boolean
+        show: Boolean,
+        categories: Array
     },
     components: {
         DateInput,
@@ -109,10 +116,14 @@ export default {
     data() {
         return {
             type: 'event',
+            textColor,
 
             //defaults should be in sync with clear()
-            value: {
+            universalValue: {
                 title: '',
+                category: null
+            },
+            value: {
                 isTodo: false,
                 fullDay: true,
                 dateFrom: todayStr(),
@@ -122,7 +133,6 @@ export default {
                 notes: ''
             },
             deadlineValue: {
-                title: '',
                 dateFrom: todayStr(),
                 dateTo: tomorrowStr(),
                 timeFrom: nowStr(),
@@ -141,7 +151,7 @@ export default {
         show: {
             handler(val) {
                 if (val) {
-                    if (this.$store.state.layout.pageTitle == 'Deadlines') {
+                    if (this.$route.path == '/deadline') {
                         this.type = 'deadline'
                     }
                 }
@@ -181,9 +191,12 @@ export default {
             if (!this.value.fullDay) this.value.timeTo = nowStr()
         },
         submit() {
+            for (let i in this.universalValue) {
+                this.value[i] = this.universalValue[i];
+                this.deadlineValue[i] = this.universalValue[i];
+            }
             if (this.type == 'deadline') {
                 // #todo
-                this.deadlineValue.title = this.value.title
             }
             else {
                 this.value.isTodo = this.type == 'todo'
@@ -204,7 +217,7 @@ export default {
                     done: false // for todo
                 }
                 listUtil.addEvent(event).then(() => {
-                    this.$store.commit('data/newEvent', true)
+                    this.$store.commit('data/change')
                     this.$emit('close')
                     this.clear()
                 }).catch(err => {
@@ -214,8 +227,11 @@ export default {
         },
         clear() {
             //reset to default
-            this.value = {
+            this.universalValue = {
                 title: '',
+                category: null
+            }
+            this.value = {
                 isTodo: true,
                 fullDay: true,
                 dateFrom: todayStr(),
@@ -223,6 +239,14 @@ export default {
                 timeFrom: null,
                 timeTo: null,
                 notes: ''
+            }
+            this.deadlineValue = {
+                dateFrom: todayStr(),
+                dateTo: tomorrowStr(),
+                timeFrom: nowStr(),
+                timeTo: nowStr(),
+                progress: 0,
+                completeDate: null
             }
             for (let i in this.inFocus) {
                 this.inFocus[i] = false

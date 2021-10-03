@@ -1,5 +1,5 @@
 export default function() {
     return {
-        newEvent: false
+        iteration: 0
     }
 }

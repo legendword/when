@@ -215,17 +215,13 @@ export default {
         }
     },
     created() {
-        this.$store.commit('layout/pageTitle', 'Calendar')
         this.helper = new CalendarHelper()
         this.monthLayout = this.helper.monthLayout()
         this.loadList()
     },
     watch: {
-        newEvent(val) {
-            if (val) {
-                this.loadList()
-                this.$store.commit('data/newEvent', false)
-            }
+        dataIteration() {
+            this.loadList()
         },
         pageVisible(val) {
             if (val) {
@@ -236,8 +232,8 @@ export default {
         }
     },
     computed: {
-        newEvent() {
-            return this.$store.state.data.newEvent
+        dataIteration() {
+            return this.$store.state.data.iteration
         },
         pageVisible() {
             return this.$store.state.layout.pageVisible

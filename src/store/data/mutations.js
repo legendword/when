@@ -1,3 +1,3 @@
-export function newEvent (state, val) {
-    state.newEvent = val
+export function change (state) {
+    state.iteration += 1
 }

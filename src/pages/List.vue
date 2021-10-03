@@ -330,11 +330,8 @@ export default {
         }
     },
     watch: {
-        newEvent(val) {
-            if (val) {
-                this.loadList()
-                this.$store.commit('data/newEvent', false)
-            }
+        dataIteration() {
+            this.loadList()
         },
         pageVisible(val) {
             if (val) {
@@ -347,15 +344,14 @@ export default {
         }
     },
     computed: {
-        newEvent() {
-            return this.$store.state.data.newEvent
+        dataIteration() {
+            return this.$store.state.data.iteration
         },
         pageVisible() {
             return this.$store.state.layout.pageVisible
         }
     },
     created() {
-        this.$store.commit('layout/pageTitle', 'Schedule')
         this.loadList()
     }
 }

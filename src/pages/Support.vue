@@ -46,9 +46,6 @@ export default {
             if (!appInfo[name]) return
             window.open(appInfo[name])
         }
-    },
-    created() {
-        this.$store.commit('layout/pageTitle', 'Support')
     }
 }
 </script>

@@ -71,7 +71,7 @@
 
         <q-dialog v-model="newEventDialog">
             <q-card style="width: 700px; max-width: 95vw;">
-                <new-event :show="newEventDialog" @close="newEventDialog = false" />
+                <new-event :show="newEventDialog" @close="newEventDialog = false" :categories="categories" />
             </q-card>
         </q-dialog>
     </q-layout>
@@ -106,8 +106,13 @@ export default {
         }
     },
     computed: {
-        pageTitle() {
-            return this.$store.state.layout.pageTitle
+        dataIteration() {
+            return this.$store.state.data.iteration
+        }
+    },
+    watch: {
+        dataIteration() {
+            this.getCategories()
         }
     },
     methods: {
