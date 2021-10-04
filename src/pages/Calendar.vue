@@ -13,14 +13,13 @@
                         <div v-else>{{ (day.date == 1 ? CalendarHelper.monthNameRef[day.month] + ' ' : '' ) + day.date }}</div>
                     </div>
                     <template v-if="days[day.fullDate] != null">
-                        <div :class="'calendar-event text-subtitle2' + (activeEvent == event.id ? ' shadow-5' : '')" v-for="event in days[day.fullDate]" :key="event.id" :title="event.title + (!event.fullDay ? (' ' + event.dateFrom.substr(11)) : '')">
-                            <div :class="'event-icon ' + (event.isTodo ? 'bg-todo' : 'bg-event')"></div>
-                            <div :class="'event-title ellipsis' + ((event.isTodo && event.done) ? ' strikethrough' : '')">{{ event.title }}</div>
-                            <div v-if="!event.fullDay" class="event-time text-grey-7">{{ event.dateFrom.substr(11) }}</div>
+                        <div :class="'calendar-event text-subtitle2' + (activeEvent == event.id ? ' shadow-5' : '')" v-for="event in days[day.fullDate]" :key="event.id" :title="event.title + (!event.fullDay ? (' ' + event.timeFrom) : '')" :style="categoryHelper.calendarItemStyle(event)">
+                            <div :class="'event-title ellipsis' + (event.isTodo ? ' todo' : '') + ((event.isTodo && event.done) ? ' strikethrough' : '')">{{ event.title }}</div>
+                            <div v-if="!event.fullDay" class="event-time text-grey-7">{{ event.timeFrom }}</div>
 
                             <q-popup-proxy @before-show="activeEvent = event.id" @before-hide="activeEvent = null">
                                 <q-card style="min-width: 400px;">
-                                    <q-bar :class="'q-pl-md text-white' + (event.isTodo ? ' bg-todo' : ' bg-event')">
+                                    <q-bar class="q-pl-md" :style="categoryHelper.itemBackgroundStyle(event)">
                                         <div class="text-body2 text-weight-medium">{{ event.isTodo ? 'Todo' : 'Event' }}</div>
                                         <q-space />
                                         <q-btn @click="confirmRemoveEvent(event)" dense flat icon="delete" />
@@ -28,26 +27,36 @@
                                         <q-btn dense flat icon="close" v-close-popup />
                                     </q-bar>
                                     <q-card-section>
-                                        <div class="text-h6">{{ event.title }}</div>
-                                        <template v-if="event.dateTo && event.dateTo.substr(0,10) != event.dateFrom.substr(0,10)"> <!-- multi-day events -->
+                                        <div class="text-h6 calendar-popup-title">
+                                            <div>{{ event.title }}</div>
+                                            <div>
+                                                <q-chip v-if="event.category != null" :style="categoryHelper.itemBackgroundStyle(event)">{{ categoryHelper.categoryName[event.category] }}</q-chip>
+                                            </div>
+                                        </div>
+                                        <template v-if="event.dateTo && event.dateTo != event.dateFrom"> <!-- multi-day events -->
                                             <div class="text-body2">
                                                 <span style="display: inline-block; width: 42px;">From </span>
                                                 <span>{{ humanWeekDate(event.dateFrom) }}</span>
-                                                <span v-if="!event.fullDay" class="text-grey-7"> {{ event.dateFrom.substr(11) }}</span>
+                                                <span v-if="!event.fullDay" class="text-grey-7"> {{ event.timeFrom }}</span>
                                             </div>
                                             <div class="text-body2">
                                                 <span style="display: inline-block; width: 42px;">To </span>
                                                 <span>{{ humanWeekDate(event.dateTo) }}</span>
-                                                <span v-if="!event.fullDay" class="text-grey-7"> {{ event.dateTo.substr(11) }}</span>
+                                                <span v-if="!event.fullDay" class="text-grey-7"> {{ event.timeTo }}</span>
                                             </div>
                                         </template>
                                         <div class="text-body2" v-else>
                                             <span>{{ humanWeekDate(event.dateFrom) }}</span>
-                                            <span v-if="!event.fullDay" class="text-grey-7"> {{ event.dateFrom.substr(11) }}</span>
-                                            <span v-if="!event.fullDay && event.dateTo" class="text-grey-7"> - {{ event.dateTo.substr(11) }}</span>
+                                            <span v-if="!event.fullDay" class="text-grey-7"> {{ event.timeFrom }}</span>
+                                            <span v-if="!event.fullDay && event.dateTo" class="text-grey-7"> - {{ event.timeTo }}</span>
                                         </div>
                                         <div class="q-mt-md event-notes" v-if="event.notes.length > 0">{{ event.notes }}</div>
                                     </q-card-section>
+                                    <q-separator />
+                                    <q-card-actions align="right" v-if="event.type == 'todo'">
+                                        <q-btn v-if="event.done" flat label="Mark Uncomplete" no-caps class="text-grey-7 text-subtitle2" @click="markAsDone(event, false)" />
+                                        <q-btn v-else flat label="Mark Completed" no-caps class="text-grey-7 text-subtitle2" @click="markAsDone(event, true)"  />
+                                    </q-card-actions>
                                 </q-card>
                             </q-popup-proxy>
 
@@ -90,10 +99,11 @@
 
 <script>
 import listUtil from '../util/list'
-import CalendarHelper from '../util/calendar'
+import CalendarHelper from '../util/CalendarHelper'
 import { humanWeekDate, offsetDate } from 'src/util/date'
 import EditEvent from '../components/EditEvent.vue'
 import moment from 'moment'
+import CategoryHelper from '../util/CategoryHelper'
 export default {
     name: 'Calendar',
     components: {
@@ -107,13 +117,19 @@ export default {
             monthLayout: [],
             helper: null,
             CalendarHelper: CalendarHelper,
-            humanWeekDate: humanWeekDate,
+            humanWeekDate,
             editEventDialog: false,
             editEventObj: {},
-            activeEvent: null
+            activeEvent: null,
+            categoryHelper: null
         }
     },
     methods: {
+        markAsDone(evt, isDone) {
+            listUtil.changeEventDone(evt, isDone).then(() => {
+                evt.done = isDone
+            })
+        },
         editEvent(evt) {
             console.log({...evt})
             this.editEventObj = evt
@@ -162,6 +178,7 @@ export default {
             this.days = {};
             let multiDayEvents = [];
             for (let i of this.list) {
+                i.type = i.isTodo ? 'todo' : 'event'
                 if (i.date == 'unassigned') {
                     this.unassigned.push(i)
                 }
@@ -206,6 +223,7 @@ export default {
             //console.log(this.unassigned, this.days)
         },
         loadList() {
+            this.categoryHelper = new CategoryHelper(this.$store.state.data.categories);
             listUtil.getAllEvents().then(res => {
                 this.list = res
                 this.sortList()
@@ -307,6 +325,13 @@ export default {
     }
 }
 
+.calendar-popup-title {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .calendar-event {
     text-align: left;
     height: 22px;
@@ -315,27 +340,28 @@ export default {
     margin-right: 2%;
     border-radius: 5px;
     padding-left: 5%;
+    padding-right: 5%;
     font-size: 13px;
     cursor: pointer;
     display: flex;
     flex-direction: row;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: center;
 
     &:hover {
         background-color: #f2f2f2;
     }
 
-    .event-icon {
-        border-radius: 9px;
-        height: 9px;
-        width: 9px;
-        margin-right: 3%;
+    .event-title.todo:not(.strikethrough) {
+        font-weight: 500;
+    }
+    .event-title.todo.strikethrough {
+        font-weight: normal;
     }
 
-    .event-time {
+    /* .event-time {
         margin-left: 3%;
-    }
+    } */
 }
 
 @media (max-width: 768px) {

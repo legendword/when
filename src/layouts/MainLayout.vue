@@ -167,6 +167,7 @@ export default {
             categoryUtil.edit(this.editCategory.id, {...this.editCategory}).then(() => {
                 this.editCategory.id = null;
                 this.getCategories();
+                this.$store.commit('data/change');
             }).catch(err => {
                 console.error(err);
             })
