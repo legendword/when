@@ -1,6 +1,7 @@
 /* list util for interacting with idb
  */
 import { idb } from '../boot/idb'
+import { offsetDate } from './date'
 const listUtil = {
     reOrderEvent: async (event, offset) => {
         //reorder event by offset
@@ -32,11 +33,12 @@ const listUtil = {
         });
         return ts.done;
     },
-    moveEvent: async (event, date, pos = null) => {
-        //move an assigned event to a different date (pos optional)
-        //pos: the index the event will be placed
+    moveEvent: async (event, dayOffset, pos = null) => {
+        //move an assigned event to a different date, by the specified dayOffset (pos optional)
+        //pos: the order the event will be placed
         const db = await idb.data
         const ts = db.transaction(['events', 'maxOrder'], 'readwrite')
+        let date = offsetDate(event.date, dayOffset)
         let maxOrder = await ts.objectStore('maxOrder').get(date)
         if (maxOrder === undefined) {
             maxOrder = 0
@@ -46,10 +48,10 @@ const listUtil = {
             date: date
         }
         if (data.dateFrom) {
-            data.dateFrom = date + data.dateFrom.substr(10)
+            data.dateFrom = date
         }
         if (data.dateTo) {
-            data.dateTo = date + data.dateTo.substr(10)
+            data.dateTo = offsetDate(data.dateTo, dayOffset)
         }
 
         if (pos == null) {
@@ -169,7 +171,7 @@ const listUtil = {
     addEvent: async (event) => {
         const db = await idb.data
         const ts = db.transaction(['events', 'maxOrder', 'categories'], 'readwrite')
-        let date = event.dateFrom ? event.dateFrom.substr(0, 10) : 'unassigned'
+        let date = event.dateFrom ? event.dateFrom : 'unassigned'
         let maxOrder = await ts.objectStore('maxOrder').get(date)
         if (maxOrder === undefined) {
             maxOrder = 0

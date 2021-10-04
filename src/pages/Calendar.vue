@@ -104,6 +104,7 @@ import { humanWeekDate, offsetDate } from 'src/util/date'
 import EditEvent from '../components/EditEvent.vue'
 import moment from 'moment'
 import CategoryHelper from '../util/CategoryHelper'
+import categoryUtil from 'src/util/category'
 export default {
     name: 'Calendar',
     components: {
@@ -143,9 +144,7 @@ export default {
             })
         },
         moveEvent(evt, dayOffset) {
-            let dest = offsetDate(evt.date, dayOffset)
-            // console.log(evt,s dayOffset, dest)
-            listUtil.moveEvent(evt, dest).then(() => {
+            listUtil.moveEvent(evt, dayOffset).then(() => {
                 this.loadList()
             }).catch(err => {
                 console.error(err)
@@ -183,14 +182,14 @@ export default {
                     this.unassigned.push(i)
                 }
                 else {
-                    let dateStr = i.date.substr(0, 10);
+                    let dateStr = i.date;
                     if (this.days[dateStr]) {
                         this.days[dateStr].push(i);
                     }
                     else {
                         this.days[dateStr] = [i];
                     }
-                    if (i.dateTo && i.dateTo.substr(0, 10) != dateStr) {
+                    if (i.dateTo && i.dateTo != dateStr) {
                         multiDayEvents.push(i);
                     }
                 }
@@ -223,12 +222,18 @@ export default {
             //console.log(this.unassigned, this.days)
         },
         loadList() {
-            this.categoryHelper = new CategoryHelper(this.$store.state.data.categories);
-            listUtil.getAllEvents().then(res => {
-                this.list = res
-                this.sortList()
+            // this.categoryHelper = new CategoryHelper(this.$store.state.data.categories);
+            categoryUtil.getAll().then(categories => {
+                this.categoryHelper = new CategoryHelper(categories);
+
+                listUtil.getAllEvents().then(res => {
+                    this.list = res
+                    this.sortList()
+                }).catch(err => {
+                    console.error('getAllEvents error: ', err)
+                })
             }).catch(err => {
-                console.error('getAllEvents error: ', err)
+                console.error('error: ', err)
             })
         }
     },

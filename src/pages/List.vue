@@ -233,9 +233,8 @@ export default {
             })
         },
         moveEvent(evt, dayOffset) {
-            let dest = offsetDate(evt.date, dayOffset)
             // console.log(evt, dayOffset, dest)
-            listUtil.moveEvent(evt, dest).then(() => {
+            listUtil.moveEvent(evt, dayOffset).then(() => {
                 this.loadList()
             }).catch(err => {
                 console.error(err)
