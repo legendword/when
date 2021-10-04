@@ -131,7 +131,7 @@ export default {
             })
         },
         editEvent(evt) {
-            console.log({...evt})
+            // console.log({...evt})
             this.editEventObj = evt
             this.editEventDialog = true
         },
@@ -144,7 +144,7 @@ export default {
         },
         moveEvent(evt, dayOffset) {
             let dest = offsetDate(evt.date, dayOffset)
-            console.log(evt, dayOffset, dest)
+            // console.log(evt,s dayOffset, dest)
             listUtil.moveEvent(evt, dest).then(() => {
                 this.loadList()
             }).catch(err => {

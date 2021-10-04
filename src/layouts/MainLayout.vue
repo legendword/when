@@ -138,8 +138,8 @@ export default {
         }
     },
     watch: {
-        dataIteration(val) {
-            console.log('MainLayout dataIteration', val)
+        dataIteration() {
+            // console.log('MainLayout dataIteration', val)
             this.getCategories()
         }
     },

@@ -75,7 +75,7 @@ export default {
                 return
             }
             deadlinesUtil.add(this.value).then(() => {
-                console.log('deadline add success')
+                // console.log('deadline add success')
                 this.$emit('close')
             }).catch(err => {
                 console.error('deadline add error: ', err)

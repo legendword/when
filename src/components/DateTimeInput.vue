@@ -114,14 +114,14 @@ export default {
             this.$emit(this.active ? 'focus' : 'blur')
         },
         valueChange(val) {
-            console.log('valueChange', val)
+            // console.log('valueChange', val)
             this.$emit('input', val)
         },
         selectAll(id) {
             if (this.$refs.dateInputs[id]) this.$refs.dateInputs[id].select()
         },
         updateValue(name, val) {
-            console.log('updateValue', name, val)
+            // console.log('updateValue', name, val)
             let info = dateComponentInfo[name]
             if (info.isValid(val)) {
                 let newStr = val.toString()

@@ -71,7 +71,7 @@ export default {
         },
         submit() {
             deadlinesUtil.update(this.value).then(() => {
-                console.log('deadline edit success')
+                // console.log('deadline edit success')
                 this.$emit('close')
             }).catch(err => {
                 console.error('deadline edit error: ', err)

@@ -161,7 +161,7 @@ export default {
                 this.value.timeTo = null
             }
             listUtil.editEvent(this.event, this.value).then(() => {
-                console.log('editEvent success')
+                // console.log('editEvent success')
                 this.$store.commit('data/change')
                 this.$emit('close')
             }).catch(err => {

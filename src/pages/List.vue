@@ -106,7 +106,7 @@ export default {
         drop(e) {
             e.preventDefault()
             let { currentSection, originalSection, currentSubsection, originalSubsection, currentIndex, originalIndex } = this.drag
-            console.log('drop', currentSection, originalSection, currentSubsection, originalSubsection, currentIndex, originalIndex)
+            // console.log('drop', currentSection, originalSection, currentSubsection, originalSubsection, currentIndex, originalIndex)
             if (currentSection == 'pastDue') {
                 this.dragEnd()
                 this.sortList()
@@ -117,7 +117,7 @@ export default {
                     this.dragEnd()
                     return //nothing to do here
                 }
-                console.log('drop: reOrderEvent')
+                // console.log('drop: reOrderEvent')
                 listUtil.reOrderEvent(this.drag.event, currentIndex - originalIndex).then(() => {
                     this.loadList()
                 }).catch(err => {
@@ -134,7 +134,7 @@ export default {
                 }
                 let targetDate = currentSubsection == null ? currentSection : this[currentSection][currentSubsection].date
                 if (this.drag.event.date == 'unassigned') {
-                    console.log('drop: assignEvent', targetDate)
+                    // console.log('drop: assignEvent', targetDate)
                     listUtil.assignEvent(this.drag.event, targetDate, currentIndex).then(() => {
                         this.loadList()
                     }).catch(err => {
@@ -142,7 +142,7 @@ export default {
                     })
                 }
                 else {
-                    console.log('drop: moveEvent', targetDate)
+                    // console.log('drop: moveEvent', targetDate)
                     listUtil.moveEvent(this.drag.event, targetDate, currentIndex).then(() => {
                         this.loadList()
                     }).catch(err => {
@@ -153,7 +153,7 @@ export default {
             this.dragEnd()
         },
         dragEnter(evt, section, subsection) {
-            console.log('dragEnter', evt === 0 ? evt : evt.title, section, subsection)
+            // console.log('dragEnter', evt === 0 ? evt : evt.title, section, subsection)
             if (!this.drag.event) return
             if (evt === 0) {
                 this.drag.hover = null
@@ -166,10 +166,9 @@ export default {
                 else {
                     let oldArr = cursub==null?this[cursec]:this[cursec][cursub].events
                     let newArr = subsection==null?this[section]:this[section][subsection].events
-                    //console.log('dragEnter!', oldArr, newArr, this.drag.currentIndex)
+                    // console.log('dragEnter!', oldArr, newArr, this.drag.currentIndex)
                     
                     arrayTransfer(oldArr, newArr, this.drag.currentIndex, 0)
-                    //console.log(oldArr, newArr)
                     this.drag.currentSection = section
                     this.drag.currentSubsection = subsection
                 }
@@ -204,13 +203,13 @@ export default {
             e.preventDefault()
         },
         dragEnd() {
-            console.log('dragEnd')
+            // console.log('dragEnd')
             this.drag.active = false
             //this.drag.event = null
             //this.sortList()
         },
         dragStart(evt, section, subsection) {
-            console.log('dragStart', evt.title)
+            // console.log('dragStart', evt.title)
             this.drag.active = true
             this.drag.event = evt
             this.drag.currentSection = section
@@ -235,7 +234,7 @@ export default {
         },
         moveEvent(evt, dayOffset) {
             let dest = offsetDate(evt.date, dayOffset)
-            console.log(evt, dayOffset, dest)
+            // console.log(evt, dayOffset, dest)
             listUtil.moveEvent(evt, dest).then(() => {
                 this.loadList()
             }).catch(err => {
@@ -243,7 +242,7 @@ export default {
             })
         },
         assignEvent(evt, day) {
-            console.log(evt, day)
+            // console.log(evt, day)
             let dt = day == 'today' ? this.today : this.tomorrow
             listUtil.assignEvent(evt, dt).then(() => {
                 this.loadList()
@@ -317,12 +316,12 @@ export default {
                 })
             }
 
-            console.log(this.unassigned, this.pastDue, this.closeDays, this.days)
+            // console.log(this.unassigned, this.pastDue, this.closeDays, this.days)
         },
         loadList() {
             listUtil.getAllEvents().then(res => {
                 this.list = res
-                console.log('getAllEvents success')
+                // console.log('getAllEvents success')
                 this.sortList()
             }).catch(err => {
                 console.error('getAllEvents error: ', err)
@@ -330,14 +329,14 @@ export default {
         }
     },
     watch: {
-        dataIteration(val) {
-            console.log('List dataIteration', val)
+        dataIteration() {
+            // console.log('List dataIteration', val)
             this.loadList()
         },
         pageVisible(val) {
             if (val) {
                 //either this.loadList() or this.sortList()
-                console.log('list re-render')
+                // console.log('list re-render')
                 this.today = todayStr()
                 this.tomorrow = tomorrowStr()
                 this.sortList()
