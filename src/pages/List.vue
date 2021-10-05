@@ -2,23 +2,27 @@
     <q-page class="q-px-md q-pb-lg">
         <q-list>
             <div v-if="unassigned.length > 0">
-                <list-header color="brown-8">
+                <list-header color="black">
                     Unassigned
                 </list-header>
                 
-                <list-event v-for="item in unassigned" :key="item.id" :item="item" :is-dragging="drag.active && drag.event.id == item.id" @edit="editEvent(item)" @remove="removeEvent(item)" @assign="assignEvent(item, $event)" @reorder="reOrderEvent(item, $event)" @dragstart.native="dragStart(item, 'unassigned', null)" @dragover.native="dragOver($event)" @drop.native="drop($event)" @dragenter.native="dragEnter(item, 'unassigned', null)" @dragleave.native="dragLeave()" @dragend.native="dragEnd()" />
+                <list-event v-for="item in unassigned" :key="item.id" :item="item" :is-dragging="drag.active && drag.event.id == item.id" @edit="editEvent(item)" @remove="removeEvent(item)" @assign="assignEvent(item, $event)" @reorder="reOrderEvent(item, $event)" @dragstart.native="dragStart(item, 'unassigned', null)" @dragover.native="dragOver($event)" @drop.native="drop($event)" @dragenter.native="dragEnter(item, 'unassigned', null)" @dragleave.native="dragLeave()" @dragend.native="dragEnd()" :categoryHelper="categoryHelper" />
+
+                <q-separator />
             </div>
 
-            <div v-if="pastDue.length > 0">
-                <list-header color="negative">
+            <div v-if="pastDue.length > 0" class="q-py-sm">
+                <list-header color="black">
                     Past Due
                 </list-header>
                 
-                <list-event v-for="item in pastDue" :key="item.id" :item="item" @edit="editEvent(item)" @remove="removeEvent(item)" @assign="assignEvent(item, $event)" no-reorder show-date :is-dragging="drag.active && drag.event.id == item.id" @dragstart.native="dragStart(item, 'pastDue', null)" @drop.native="drop($event)" @dragend.native="dragEnd()" />
+                <list-event v-for="item in pastDue" :key="item.id" :item="item" @edit="editEvent(item)" @remove="removeEvent(item)" @assign="assignEvent(item, $event)" no-reorder show-date :is-dragging="drag.active && drag.event.id == item.id" @dragstart.native="dragStart(item, 'pastDue', null)" @drop.native="drop($event)" @dragend.native="dragEnd()" :categoryHelper="categoryHelper" />
+
+                <q-separator />
             </div>
 
             <div v-for="(day, dayInd) in closeDays" :key="day.date">
-                <list-header :color="day.displayDate == 'Today' ? 'orange-8' : 'light-green-8'" @dragover.native="dragOver($event)" @dragenter.native="dragEnter(0, 'closeDays', dayInd)" @drop.native="drop($event)">
+                <list-header color="black" @dragover.native="dragOver($event)" @dragenter.native="dragEnter(0, 'closeDays', dayInd)" @drop.native="drop($event)">
                     {{ day.displayDate }}
 
                     <template v-slot:side>
@@ -26,7 +30,7 @@
                     </template>
                 </list-header>
 
-                <list-event v-for="item in day.events" :key="item.id" :item="item" is-assigned :is-today="day.displayDate == 'Today'" @edit="editEvent(item)" @remove="removeEvent(item)" @move="moveEvent(item, $event)" @reorder="reOrderEvent(item, $event)" :is-dragging="drag.active && drag.event.id == item.id" @dragstart.native="dragStart(item, 'closeDays', dayInd)" @dragover.native="dragOver($event)" @drop.native="drop($event)" @dragenter.native="dragEnter(item, 'closeDays', dayInd)" @dragleave.native="dragLeave()" @dragend.native="dragEnd()" />
+                <list-event v-for="item in day.events" :key="item.id" :item="item" is-assigned :is-today="day.displayDate == 'Today'" @edit="editEvent(item)" @remove="removeEvent(item)" @move="moveEvent(item, $event)" @reorder="reOrderEvent(item, $event)" :is-dragging="drag.active && drag.event.id == item.id" @dragstart.native="dragStart(item, 'closeDays', dayInd)" @dragover.native="dragOver($event)" @drop.native="drop($event)" @dragenter.native="dragEnter(item, 'closeDays', dayInd)" @dragleave.native="dragLeave()" @dragend.native="dragEnd()" :categoryHelper="categoryHelper" />
 
                 <q-item v-if="day.events.length == 0">
                     <q-item-section side>
@@ -38,14 +42,18 @@
                         <div class="text-subtitle2 text-grey-8">No events.</div>
                     </q-item-section>
                 </q-item>
+
+                <q-separator v-if="days.length != 0 || dayInd != closeDays.length - 1" />
             </div>
 
             <div v-for="(day, dayInd) in days" :key="day.date">
-                <list-header color="light-green-8" @dragover.native="dragOver($event)" @dragenter.native="dragEnter(0, 'closeDays', dayInd)" @drop.native="drop($event)">
+                <list-header color="black" @dragover.native="dragOver($event)" @dragenter.native="dragEnter(0, 'closeDays', dayInd)" @drop.native="drop($event)">
                     {{ humanDate(day.date) }}
                 </list-header>
 
-                <list-event v-for="item in day.events" :key="item.id" :item="item" isAssigned @edit="editEvent(item)" @remove="removeEvent(item)" @move="moveEvent(item, $event)" @reorder="reOrderEvent(item, $event)" :is-dragging="drag.active && drag.event.id == item.id" @dragstart.native="dragStart(item, 'days', dayInd)" @dragover.native="dragOver($event)" @drop.native="drop($event)" @dragenter.native="dragEnter(item, 'days', dayInd)" @dragleave.native="dragLeave()" @dragend.native="dragEnd()" />
+                <list-event v-for="item in day.events" :key="item.id" :item="item" isAssigned @edit="editEvent(item)" @remove="removeEvent(item)" @move="moveEvent(item, $event)" @reorder="reOrderEvent(item, $event)" :is-dragging="drag.active && drag.event.id == item.id" @dragstart.native="dragStart(item, 'days', dayInd)" @dragover.native="dragOver($event)" @drop.native="drop($event)" @dragenter.native="dragEnter(item, 'days', dayInd)" @dragleave.native="dragLeave()" @dragend.native="dragEnd()" :categoryHelper="categoryHelper" />
+
+                <q-separator v-if="dayInd != days.length - 1" />
             </div>
         </q-list>
         <!--
@@ -69,6 +77,8 @@ import listUtil from '../util/list'
 import { arrayMove, arrayTransfer } from '../util/array'
 import moment from 'moment'
 import { datecmp, offsetDate, humanDate, todayStr, tomorrowStr } from 'src/util/date'
+import categoryUtil from 'src/util/category'
+import CategoryHelper from 'src/util/CategoryHelper'
 //import { mapState } from 'vuex'
 export default {
     name: 'List',
@@ -99,7 +109,8 @@ export default {
                 currentSubsection: null,
                 currentIndex: null,
                 hover: null
-            }
+            },
+            categoryHelper: null
         }
     },
     methods: {
@@ -318,12 +329,17 @@ export default {
             // console.log(this.unassigned, this.pastDue, this.closeDays, this.days)
         },
         loadList() {
-            listUtil.getAllEvents().then(res => {
-                this.list = res
-                // console.log('getAllEvents success')
-                this.sortList()
+            categoryUtil.getAll().then(categories => {
+                this.categoryHelper.setCategories(categories);
+
+                listUtil.getAllEvents().then(res => {
+                    this.list = res
+                    this.sortList()
+                }).catch(err => {
+                    console.error('getAllEvents error: ', err)
+                })
             }).catch(err => {
-                console.error('getAllEvents error: ', err)
+                console.error('error: ', err)
             })
         }
     },
@@ -351,6 +367,7 @@ export default {
         }
     },
     created() {
+        this.categoryHelper = new CategoryHelper()
         this.loadList()
     }
 }

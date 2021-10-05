@@ -1,13 +1,13 @@
 <template>
     <q-item draggable dense :class="'q-my-sm list-event' + (isDragging ? ' list-event-dragging' : '')" @mouseenter="hoverState(true)" @mouseleave="hoverState(false)">
         <q-item-section side top>
-            <q-checkbox :value="item.done" @input="checkItem" v-if="item.isTodo" />
+            <q-checkbox class="list-checkbox" :value="item.done" @input="checkItem" v-if="item.isTodo" keep-color :style="categoryHelper.itemTextStyle(item)" />
             <div class="checkbox-placeholder flex items-center justify-center" v-else>
-                <div class="list-dot"></div>
+                <div class="list-dot" :style="categoryHelper.itemBackgroundStyle(item)"></div>
             </div>
         </q-item-section>
         <q-item-section>
-            <div :class="'list-title' + (item.isTodo&&item.done?' strikethrough':'')">
+            <div :class="'list-title' + (item.isTodo&&item.done?' strikethrough':'')" :style="categoryHelper.itemTextStyle(item)">
                 <span>{{ item.title }}</span>
                 <span v-if="item.dateFrom.length > 11" class="list-time">{{ item.dateFrom.substr(11) }}</span>
             </div>
@@ -85,6 +85,9 @@ export default {
         isDragging: {
             type: Boolean,
             default: false
+        },
+        categoryHelper: {
+            type: Object
         }
     },
     data() {
@@ -130,15 +133,15 @@ export default {
 }
 .list-title {
     font-size: 1rem;
+    font-weight: 500;
 }
 .list-notes {
     font-size: 0.9rem;
     color: #616161;
 }
 .list-dot {
-    border-radius: 8px;
-    height: 8px;
-    width: 8px;
-    background-color: $primary;
+    border-radius: 10px;
+    height: 10px;
+    width: 10px;
 }
 </style>

@@ -224,7 +224,7 @@ export default {
         loadList() {
             // this.categoryHelper = new CategoryHelper(this.$store.state.data.categories);
             categoryUtil.getAll().then(categories => {
-                this.categoryHelper = new CategoryHelper(categories);
+                this.categoryHelper.setCategories(categories);
 
                 listUtil.getAllEvents().then(res => {
                     this.list = res
@@ -240,6 +240,7 @@ export default {
     created() {
         this.helper = new CalendarHelper()
         this.monthLayout = this.helper.monthLayout()
+        this.categoryHelper = new CategoryHelper()
         this.loadList()
     },
     watch: {

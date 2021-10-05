@@ -4,9 +4,12 @@ class CategoryHelper {
 
     static defaultCategoryColor = '#1976D2';
 
-    constructor(categories) {
+    constructor() {
         this.categoryColor = {};
         this.categoryName = {};
+    }
+
+    setCategories(categories) {
         for (let i of categories) {
             this.categoryColor[i.id] = i.color;
             this.categoryName[i.id] = i.name;
@@ -14,7 +17,7 @@ class CategoryHelper {
     }
 
     calendarItemStyle(item) {
-        let a = item.category == null ? CategoryHelper.defaultCategoryColor : this.categoryColor[item.category], b = textColor(a);
+        let a = item.category == null ? CategoryHelper.defaultCategoryColor : (this.categoryColor[item.category] ?? CategoryHelper.defaultCategoryColor), b = textColor(a);
         if (item.type == 'event') {
             return {
                 backgroundColor: a,

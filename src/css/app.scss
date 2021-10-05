@@ -9,6 +9,11 @@
         padding-left: 0 !important;
     }
 }
+.list-checkbox {
+    .q-checkbox__inner {
+        color: inherit !important;
+    }
+}
 
 // custom colors
 .text-transparent {
