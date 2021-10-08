@@ -190,7 +190,7 @@ export default {
         },
         addDateTo() {
             this.value.dateTo = todayStr()
-            if (!this.value.fullDay) this.value.timeTo = nowStr()
+            if (!this.value.fullDay) this.value.timeTo = nowStr(60, 'minutes')
         },
         submit() {
             for (let i in this.universalValue) {

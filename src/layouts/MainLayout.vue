@@ -80,7 +80,7 @@
                                 </q-list>
                             </q-menu>
 
-                            <q-popup-proxy :value="editCategory.id == category.id">
+                            <q-popup-proxy :value="editCategory.id == category.id" @input="editCategoryPopupChange">
                                 <q-card class="q-pa-sm">
                                     <q-input class="category-input-wrapper" autofocus v-model="editCategory.name" hide-bottom-space placeholder="Category Name" />
                                     <q-color class="q-my-md" v-model="editCategory.color" format-model="hex" default-view="palette" :palette="categoryColorPalette" />
@@ -168,6 +168,15 @@ export default {
         }
     },
     methods: {
+        editCategoryPopupChange(val) {
+            if (!val) {
+                this.editCategory = {
+                    id: null,
+                    name: '',
+                    color: ''
+                };
+            }
+        },
         getCategories() {
             categoryUtil.getAll().then(res => {
                 this.categories = res;

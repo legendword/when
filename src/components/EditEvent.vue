@@ -1,6 +1,6 @@
 <template>
     <div class="q-py-lg q-px-xl">
-        <div class="full-width">
+        <div class="full-width" v-if="valueInitialized">
             <div class="q-mb-md">
                 <q-input autofocus v-model="value.title" hide-bottom-space placeholder="Title" ref="title" input-class="text-input" />
             </div>
@@ -79,6 +79,7 @@ import DateInput from './DateInput.vue'
 import TimeInput from './TimeInput.vue'
 import listUtil from '../util/list'
 import { textColor } from '../util/color'
+import { nowStr, todayStr } from 'src/util/date'
 export default {
     name: 'EditEvent',
     props: {
@@ -124,7 +125,6 @@ export default {
         delete this.value.type;
         this.type = this.value.isTodo ? 'todo' : 'event';
         this.valueInitialized = true;
-        this.$refs.title.focus();
     },
     methods: {
         goFocus(name) {
@@ -155,7 +155,7 @@ export default {
         },
         addDateTo() {
             this.value.dateTo = todayStr()
-            if (!this.value.fullDay) this.value.timeTo = nowStr()
+            if (!this.value.fullDay) this.value.timeTo = nowStr(60, 'minutes')
         },
         submit() {
             this.value.isTodo = this.type == 'todo'

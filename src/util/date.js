@@ -21,7 +21,8 @@ export const daysFromNow = function(date) {
     //return difference in days between xxxx-xx-xx and now, using momentjs
     return moment(date, 'YYYY-MM-DD').diff(moment(), 'days')
 }
-export const nowStr = function() {
+export const nowStr = function(offsetValue = null, offsetUnit = null) {
+    if (offsetValue != null) return moment().add(offsetValue, offsetUnit).format('HH:mm')
     return moment().format('HH:mm')
 }
 export const todayStr = function() {
