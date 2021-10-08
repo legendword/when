@@ -68,7 +68,7 @@
                 <q-tab-panel name="deadline" class="ne-tab-panel">
                     <div class="ne-row">
                         <div class="ne-icon">
-                            <q-icon name="schedule" :color="inFocus.date ? 'primary' : 'default'" size="20px" />
+                            <q-icon name="schedule" :color="(inFocus.date && (currentActive == 'dateFrom' || currentActive == 'timeFrom')) ? 'primary' : 'default'" size="20px" />
                         </div>
                         <div class="ne-input ne-date-wrapper">
                             <div style="width: 50px;">Starts </div>
@@ -78,7 +78,7 @@
                     </div>
                     <div class="ne-row">
                         <div class="ne-icon">
-                            <q-icon name="alarm" :color="inFocus.date ? 'primary' : 'default'" size="20px" />
+                            <q-icon name="alarm" :color="(inFocus.date && (currentActive == 'dateTo' || currentActive == 'timeTo')) ? 'primary' : 'default'" size="20px" />
                         </div>
                         <div class="ne-input ne-date-wrapper">
                             <div style="width: 50px;">Due </div>
@@ -138,6 +138,7 @@ export default {
                 dateTo: tomorrowStr(),
                 timeFrom: nowStr(),
                 timeTo: nowStr(),
+                startDate: '', // calculated at submit()
                 dueDate: '', // calculated at submit()
                 progress: 0,
                 completeDate: null
@@ -208,6 +209,7 @@ export default {
                 }
                 let ddl = {
                     ...this.deadlineValue,
+                    startDate: this.deadlineValue.dateFrom + ' ' + this.deadlineValue.timeFrom,
                     dueDate: this.deadlineValue.dateTo + ' ' + this.deadlineValue.timeTo
                 }
                 deadlinesUtil.add(ddl).then(() => {

@@ -110,7 +110,7 @@ export default {
                 currentIndex: null,
                 hover: null
             },
-            categoryHelper: null
+            categoryHelper: new CategoryHelper()
         }
     },
     methods: {
@@ -394,7 +394,6 @@ export default {
         }
     },
     created() {
-        this.categoryHelper = new CategoryHelper()
         this.loadList()
     }
 }

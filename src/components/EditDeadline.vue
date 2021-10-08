@@ -1,76 +1,102 @@
 <template>
     <div class="q-py-md q-px-xl">
-        <div class="q-my-md text-h4">Edit Deadline</div>
         <div class="full-width">
-            <div class="q-mb-lg">
-                <q-input v-model="value.title" label="Title" ref="title" input-class="text-input" />
-            </div>
             <div class="q-mb-md">
-                <date-time-input v-model="value.startDate" label="Start Date" :date-only="false" @focus="dateFocus('startDate')" @blur="inFocus.dateFrom = false" ref="startDate" />
+                <q-input autofocus v-model="value.title" hide-bottom-space placeholder="Title" ref="title" input-class="text-input" />
             </div>
-            <div class="q-mb-md">
-                <date-time-input v-model="value.dueDate" label="Due Date" :date-only="false" @focus="dateFocus('dueDate')" @blur="inFocus.dateTo = false" ref="dueDate" />
+            <div class="q-my-md">
+                <q-chip v-for="category in categories" :key="category.id" clickable :outline="value.category != category.id" :style="value.category != category.id ? {color: category.color} : {backgroundColor: category.color, color: textColor(category.color)}" @click="value.category = value.category == category.id ? null : category.id">
+                    {{ category.name }}
+                </q-chip>
             </div>
-            <div class="q-my-lg">
-                <q-btn color="primary" unelevated label="Save" class="full-width" @click="submit" />
+            <div class="ne-row">
+                <div class="ne-icon">
+                    <q-icon name="schedule" :color="(inFocus.date && (currentActive == 'dateFrom' || currentActive == 'timeFrom')) ? 'primary' : 'default'" size="20px" />
+                </div>
+                <div class="ne-input ne-date-wrapper">
+                    <div style="width: 50px;">Starts </div>
+                    <date-input v-model="value.dateFrom" @focus="dateFocus('dateFrom')" @blur="dateBlur('dateFrom')" />
+                    <time-input v-model="value.timeFrom" @focus="dateFocus('timeFrom')" @blur="dateBlur('timeFrom')" />
+                </div>
+            </div>
+            <div class="ne-row">
+                <div class="ne-icon">
+                    <q-icon name="alarm" :color="(inFocus.date && (currentActive == 'dateTo' || currentActive == 'timeTo')) ? 'primary' : 'default'" size="20px" />
+                </div>
+                <div class="ne-input ne-date-wrapper">
+                    <div style="width: 50px;">Due </div>
+                    <date-input v-model="value.dateTo" @focus="dateFocus('dateTo')" @blur="dateBlur('dateTo')" />
+                    <time-input v-model="value.timeTo" @focus="dateFocus('timeTo')" @blur="dateBlur('timeTo')" />
+                </div>
+            </div>
+            <div class="q-mt-lg q-mb-md">
+                <q-btn color="primary" unelevated label="Done" @click="submit" />
+                <q-btn color="grey" flat label="Cancel" @click="$emit('close')" class="q-ml-sm" />
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import DateTimeInput from './DateTimeInput.vue'
+import DateInput from './DateInput.vue'
+import TimeInput from './TimeInput.vue'
 import moment from 'moment'
 import deadlinesUtil from '../util/deadlines'
+import { textColor } from '../util/color'
+import { nowStr, todayStr, tomorrowStr } from 'src/util/date'
 export default {
     name: 'EditDeadline',
     props: {
         ddl: Object
     },
     components: {
-        DateTimeInput
+        DateInput,
+        TimeInput
+    },
+    computed: {
+        categories() {
+            return this.$store.state.data.categories;
+        }
     },
     data() {
         return {
+            textColor,
             value: {
-                title: '',
-                startDate: moment().format('YYYY-MM-DD HH:mm'),
-                dueDate: moment().add(1, 'day').format('YYYY-MM-DD HH:mm'),
+                dateFrom: todayStr(),
+                dateTo: tomorrowStr(),
+                timeFrom: nowStr(),
+                timeTo: nowStr(),
+                startDate: '', // calculated at submit()
+                dueDate: '', // calculated at submit()
                 progress: 0,
                 completeDate: null
             },
             inFocus: {
-                //notes: false,
-                startDate: false,
-                dueDate: false
-            }
+                date: false,
+                // notes: false
+            },
+            currentActive: ''
         }
     },
     mounted() {
         this.value = {...this.ddl}
-        this.$refs.title.focus()
     },
     methods: {
-        goFocus(name) {
-            if (this.$refs[name]) {
-                this.$refs[name].focus()
-                for (let i of ['startDate', 'dueDate']) {
-                    if (this.inFocus[i]) {
-                        this.$refs[i].toggleActive()
-                    }
-                }
-            }
+        dateFocus(val) {
+            this.inFocus.date = true
+            this.currentActive = val
         },
-        dateFocus(name) {
-            this.inFocus[name] = true
-            for (let i of ['startDate', 'dueDate']) {
-                if (i != name && this.inFocus[i]) {
-                    this.$refs[i].toggleActive()
-                }
-            }
+        dateBlur(val) {
+            if (this.currentActive == val) this.inFocus.date = false
         },
         submit() {
-            deadlinesUtil.update(this.value).then(() => {
+            // #todo date validation
+            let submitValue = {
+                ...this.value,
+                startDate: this.value.dateFrom + ' ' + this.value.timeFrom,
+                dueDate: this.value.dateTo + ' ' + this.value.timeTo
+            }
+            deadlinesUtil.update(submitValue).then(() => {
                 // console.log('deadline edit success')
                 this.$emit('close')
             }).catch(err => {

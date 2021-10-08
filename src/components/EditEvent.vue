@@ -1,5 +1,5 @@
 <template>
-    <div class="q-py-lg q-px-xl">
+    <div class="q-py-md q-px-xl">
         <div class="full-width" v-if="valueInitialized">
             <div class="q-mb-md">
                 <q-input autofocus v-model="value.title" hide-bottom-space placeholder="Title" ref="title" input-class="text-input" />

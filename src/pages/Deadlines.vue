@@ -12,8 +12,8 @@
                     <q-card-section>
                         <div class="row justify-between">
                             <div class="text-h5">
-                                <span>{{ddl.title}}</span>
-                                <span class="q-ml-md text-primary">due {{dueStr[ddl.id]}}</span>
+                                <span :style="categoryHelper.itemTextStyle(ddl)">{{ddl.title}}</span>
+                                <span class="q-ml-md">due {{dueStr[ddl.id]}}</span>
                             </div>
                             <div>
                                 <q-btn v-if="ddl.completeDate == null" class="q-mr-sm" color="primary" label="Complete" @click="completeDeadline(ind)" />
@@ -45,7 +45,7 @@
         <q-btn v-if="!showHistory" flat label="View Past Deadlines" color="grey-7" class="full-width" :loading="historyLoading" @click="viewHistory" ref="historyLoadBtn" />
         <div v-else class="q-mt-lg q-mb-md">
             <div class="text-h6 text-grey-7">Past Deadlines</div>
-            <div v-if="deadlines.length == 0">
+            <div v-if="historyDeadlines.length == 0">
                 <div class="text-subtitle1 q-my-md text-grey-7">No past deadlines.</div>
             </div>
         </div>
@@ -55,8 +55,8 @@
                     <q-card-section>
                         <div class="row justify-between">
                             <div class="text-h5">
-                                <span>{{ddl.title}}</span>
-                                <span class="q-ml-md text-primary">due {{calendarTime(ddl.dueDate)}}</span>
+                                <span :style="categoryHelper.itemTextStyle(ddl)">{{ddl.title}}</span>
+                                <span class="q-ml-md">due {{calendarTime(ddl.dueDate)}}</span>
                             </div>
                             <div>
                                 <q-btn v-if="ddl.completeDate == null" class="q-mr-sm" color="primary" label="Complete" disable />
@@ -101,6 +101,8 @@ import { calendarTime } from '../util/date'
 import deadlinesUtil from '../util/deadlines'
 import DeadlineProgress from '../components/DeadlineProgress.vue'
 import EditDeadline from '../components/EditDeadline.vue'
+import categoryUtil from 'src/util/category'
+import CategoryHelper from 'src/util/CategoryHelper'
 export default {
     name: 'Deadlines',
     components: {
@@ -119,7 +121,8 @@ export default {
             calendarTime,
             showHistory: false,
             historyLoading: false,
-            historyDeadlines: []
+            historyDeadlines: [],
+            categoryHelper: new CategoryHelper()
         }
     },
     methods: {
@@ -163,6 +166,13 @@ export default {
             for (let i of this.deadlines) {
                 let start = moment(i.startDate)
                 let end = moment(i.dueDate)
+                if (cur.diff(end) > 0) {
+                    this.loadDeadlines()
+                    if (this.showHistory) {
+                        this.loadHistoryDeadlines()
+                    }
+                    return
+                }
                 let prog = cur.diff(start) / end.diff(start)
                 this.timeProgress[i.id] = prog
                 this.dueStr[i.id] = cur.to(end)
@@ -186,17 +196,24 @@ export default {
             this.addDialog = false
         },
         loadDeadlines() {
-            deadlinesUtil.getAllActive().then((res) => {
-                this.deadlines = res
-                let timeProgress = {}
-                let dueStr = {}
-                for (let i of this.deadlines) {
-                    timeProgress[i.id] = 0
-                    dueStr[i.id] = ''
-                }
-                this.timeProgress = timeProgress
-                this.dueStr = dueStr
-                this.updateTime()
+            categoryUtil.getAll().then(categories => {
+                this.categoryHelper.setCategories(categories);
+
+                deadlinesUtil.getAllActive().then((res) => {
+                    this.deadlines = res
+                    let timeProgress = {}
+                    let dueStr = {}
+                    for (let i of this.deadlines) {
+                        timeProgress[i.id] = 0
+                        dueStr[i.id] = ''
+                        // i.startDate = i.dateFrom + ' ' + i.timeFrom
+                    }
+                    this.timeProgress = timeProgress
+                    this.dueStr = dueStr
+                    this.updateTime()
+                }).catch(err => {
+                    console.error(err)
+                })
             }).catch(err => {
                 console.error(err)
             })
@@ -205,6 +222,9 @@ export default {
     watch: {
         dataIteration() {
             this.loadDeadlines()
+            if (this.showHistory) {
+                this.loadHistoryDeadlines()
+            }
         },
         pageVisible(val) {
             if (val) {
