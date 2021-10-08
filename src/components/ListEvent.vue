@@ -1,5 +1,5 @@
 <template>
-    <q-item draggable dense :class="'q-my-sm list-event' + (isDragging ? ' list-event-dragging' : '')" @mouseenter="hoverState(true)" @mouseleave="hoverState(false)">
+    <q-item :draggable="!item.multiDay" dense :class="'q-my-sm list-event' + (isDragging ? ' list-event-dragging' : '')" @mouseenter="hoverState(true)" @mouseleave="hoverState(false)">
         <q-item-section side top>
             <q-checkbox class="list-checkbox" :value="item.done" @input="checkItem" v-if="item.isTodo" keep-color :style="categoryHelper.itemTextStyle(item)" />
             <div class="checkbox-placeholder flex items-center justify-center" v-else>
@@ -21,7 +21,7 @@
         >
             <q-list dense style="min-width: 100px">
                 <template v-if="isAssigned">
-                    <q-item clickable v-close-popup :disable="isToday" @click="$emit('move', -1)">
+                    <q-item clickable v-close-popup @click="$emit('move', -1)">
                         <q-item-section>Move to Previous Day</q-item-section>
                     </q-item>
                     <q-item clickable v-close-popup @click="$emit('move', 1)">
@@ -37,7 +37,7 @@
                     </q-item>
                 </template>
                 <q-separator />
-                <template v-if="!noReorder">
+                <template v-if="!noReorder && !item.multiDay">
                     <q-item clickable v-close-popup @click="$emit('reorder', -1)">
                         <q-item-section>Move Up</q-item-section>
                     </q-item>
@@ -69,9 +69,6 @@ export default {
             required: true
         },
         isAssigned: {
-            type: Boolean
-        },
-        isToday: {
             type: Boolean
         },
         noReorder: {

@@ -100,7 +100,7 @@
 <script>
 import listUtil from '../util/list'
 import CalendarHelper from '../util/CalendarHelper'
-import { humanWeekDate, offsetDate } from 'src/util/date'
+import { humanWeekDate, offsetDate, thisMonth } from 'src/util/date'
 import EditEvent from '../components/EditEvent.vue'
 import moment from 'moment'
 import CategoryHelper from '../util/CategoryHelper'
@@ -205,9 +205,9 @@ export default {
             }
             // multi-day events parsing
             for (let i of multiDayEvents) {
-                let jt = i.dateFrom.substr(0, 10);
+                let jt = i.dateFrom;
                 let j = moment(jt, 'YYYY-MM-DD');
-                while (jt != i.dateTo.substr(0, 10)) {
+                while (jt != i.dateTo) {
                     j.add(1, 'day');
                     jt = j.format('YYYY-MM-DD');
                     if (this.days[jt]) {
@@ -241,6 +241,7 @@ export default {
         this.helper = new CalendarHelper()
         this.monthLayout = this.helper.monthLayout()
         this.categoryHelper = new CategoryHelper()
+        this.$store.commit('data/changeMonth', thisMonth())
         this.loadList()
     },
     watch: {

@@ -119,6 +119,9 @@ export default {
     },
     mounted() {
         this.value = {...this.event};
+        // delete potentially added properties of the event
+        delete this.value.multiDay;
+        delete this.value.type;
         this.type = this.value.isTodo ? 'todo' : 'event';
         this.valueInitialized = true;
         this.$refs.title.focus();

@@ -30,7 +30,7 @@
                     </template>
                 </list-header>
 
-                <list-event v-for="item in day.events" :key="item.id" :item="item" is-assigned :is-today="day.displayDate == 'Today'" @edit="editEvent(item)" @remove="removeEvent(item)" @move="moveEvent(item, $event)" @reorder="reOrderEvent(item, $event)" :is-dragging="drag.active && drag.event.id == item.id" @dragstart.native="dragStart(item, 'closeDays', dayInd)" @dragover.native="dragOver($event)" @drop.native="drop($event)" @dragenter.native="dragEnter(item, 'closeDays', dayInd)" @dragleave.native="dragLeave()" @dragend.native="dragEnd()" :categoryHelper="categoryHelper" />
+                <list-event v-for="item in day.events" :key="item.id" :item="item" is-assigned @edit="editEvent(item)" @remove="removeEvent(item)" @move="moveEvent(item, $event)" @reorder="reOrderEvent(item, $event)" :is-dragging="drag.active && drag.event.id == item.id" @dragstart.native="dragStart(item, 'closeDays', dayInd)" @dragover.native="dragOver($event)" @drop.native="drop($event)" @dragenter.native="dragEnter(item, 'closeDays', dayInd)" @dragleave.native="dragLeave()" @dragend.native="dragEnd()" :categoryHelper="categoryHelper" />
 
                 <q-item v-if="day.events.length == 0">
                     <q-item-section side>
@@ -268,65 +268,92 @@ export default {
             })
         },
         sortList() { //sort list content into unassigned, pastDue, and days
-            this.unassigned = []
-            this.pastDue = []
-            this.closeDays = []
-            this.days = []
-            let d = moment()
-            const dateNames = ['Today', 'Tomorrow']
+            this.unassigned = [];
+            this.pastDue = [];
+            this.closeDays = [];
+            this.days = [];
+            let multiDayEvents = [];
+            let d = moment();
+            const dateNames = ['Today', 'Tomorrow'];
             for (let i=0;i<7;i++) {
                 this.closeDays.push({
                     date: d.format('YYYY-MM-DD'),
                     displayDate: i<2 ? dateNames[i] : d.format('dddd'),
                     events: []
-                })
-                d = d.add(1, 'd')
+                });
+                d = d.add(1, 'd');
             }
             for (let i of this.list) {
                 // if (i.isTodo && i.done) continue
                 if (i.date == 'unassigned') {
-                    this.unassigned.push(i)
+                    this.unassigned.push(i);
                 }
                 else if (datecmp(i.date, this.today) < 0) {
-                    if (!i.isTodo) continue // none-todo events are not past due
-                    if (i.done) continue // done todos are not past due
-                    this.pastDue.push(i)
+                    if (!i.isTodo) continue; // none-todo events are not past due
+                    if (i.done) continue; // done todos are not past due
+                    this.pastDue.push(i);
                 }
                 else {
-                    let dateStr = i.date.substr(0, 10)
-                    let closeInd = this.closeDays.findIndex(v => v.date == dateStr)
+                    let dateStr = i.date;
+                    i.multiDay = i.dateTo && i.dateTo != dateStr;
+                    let closeInd = this.closeDays.findIndex(v => v.date == dateStr);
                     if (closeInd == -1) {
-                        let ind = this.days.findIndex(v => v.date == dateStr)
+                        let ind = this.days.findIndex(v => v.date == dateStr);
                         if (ind == -1) {
                             this.days.push({
                                 date: dateStr,
                                 events: [i]
-                            })
+                            });
                         }
                         else {
-                            this.days[ind].events.push(i)
+                            this.days[ind].events.push(i);
                         }
                     }
                     else {
-                        this.closeDays[closeInd].events.push(i)
+                        this.closeDays[closeInd].events.push(i);
+                    }
+                    if (i.multiDay) {
+                        // multi-day event parsing
+                        let jt = i.dateFrom;
+                        let j = moment(jt, 'YYYY-MM-DD');
+                        while (jt != i.dateTo) {
+                            j.add(1, 'day');
+                            jt = j.format('YYYY-MM-DD');
+                            let closeInd = this.closeDays.findIndex(v => v.date == jt);
+                            if (closeInd == -1) {
+                                let ind = this.days.findIndex(v => v.date == jt);
+                                if (ind == -1) {
+                                    this.days.push({
+                                        date: jt,
+                                        events: [i]
+                                    });
+                                }
+                                else {
+                                    this.days[ind].events.push(i);
+                                }
+                            }
+                            else {
+                                this.closeDays[closeInd].events.push(i);
+                            }
+                        }
                     }
                 }
             }
             this.unassigned.sort((a, b) => {
                 return a.order - b.order
-            })
+            });
             for (let i in this.closeDays) {
                 this.closeDays[i].events.sort((a, b) => {
                     return a.order - b.order
-                })
+                });
             }
             for (let i in this.days) {
                 this.days[i].events.sort((a, b) => {
                     return a.order - b.order
-                })
+                });
             }
 
-            // console.log(this.unassigned, this.pastDue, this.closeDays, this.days)
+            console.log(this.unassigned, this.pastDue, this.closeDays, this.days)
         },
         loadList() {
             categoryUtil.getAll().then(categories => {
