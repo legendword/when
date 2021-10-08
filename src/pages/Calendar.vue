@@ -249,7 +249,6 @@ export default {
         },
         pageVisible(val) {
             if (val) {
-                this.helper = new CalendarHelper()
                 this.monthLayout = this.helper.monthLayout()
                 this.sortList()
             }

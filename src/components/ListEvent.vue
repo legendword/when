@@ -117,7 +117,7 @@ export default {
     transition: background-color 300ms ease;
 
     &:hover {
-        background-color: $grey-3;
+        background-color: $grey-2;
     }
 }
 .list-time {
