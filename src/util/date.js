@@ -32,6 +32,15 @@ export const tomorrowStr = function() {
     //return today's xxxx-xx-xx string
     return moment().add(1, 'd').format('YYYY-MM-DD')
 }
+export const readableMonth = function(month) {
+    return moment(month, 'YYYY-MM').format('MMM YYYY')
+}
+export const thisMonth = function() {
+    return moment().format('YYYY-MM')
+}
+export const offsetMonth = function(month, offset) {
+    return moment(month, 'YYYY-MM').add(offset, 'month').format('YYYY-MM')
+}
 export const formatDate = function(date) {
     //formats date into xxxx-xx-xx
     var d = new Date(date),

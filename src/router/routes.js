@@ -4,10 +4,10 @@ const routes = [
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/List.vue') },
-      { path: 'calendar', component: () => import('pages/Calendar.vue') },
-      { path: 'deadlines', component: () => import('pages/Deadlines.vue') },
-      { path: 'support', component: () => import('pages/Support.vue') }
+      { path: '', name: 'Schedule', component: () => import('pages/List.vue') },
+      { path: 'calendar', name: 'Calendar', component: () => import('pages/Calendar.vue') },
+      { path: 'deadlines', name: 'Deadlines', component: () => import('pages/Deadlines.vue') },
+      { path: 'support', name: 'Support', component: () => import('pages/Support.vue') }
     ]
   },
 

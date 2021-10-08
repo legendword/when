@@ -9,13 +9,18 @@ class CalendarHelper {
         this.today = this.cur.format('YYYY-MM-DD');
     }
 
+    changeMonth(monthStr) {
+        this.cur = moment(monthStr, 'YYYY-MM');
+    }
+
     monthLayout() {
-        let firstDayOfMonth = moment().date(1);
+        let firstDayOfMonth = moment(this.cur).date(1);
         let thisMonth = firstDayOfMonth.month();
+        let nextMonth = thisMonth == 11 ? 0 : thisMonth + 1;
         let startingWeekOfDay = firstDayOfMonth.day();
         let d = moment(firstDayOfMonth).subtract(startingWeekOfDay, 'day');
         let res = [], row = [];
-        while (d.month() != thisMonth + 1) {
+        while (d.month() != nextMonth) {
             row.push({
                 fullDate: d.format('YYYY-MM-DD'),
                 month: d.month(),

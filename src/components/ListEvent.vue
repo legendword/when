@@ -9,7 +9,7 @@
         <q-item-section>
             <div :class="'list-title' + (item.isTodo&&item.done?' strikethrough':'')" :style="categoryHelper.itemTextStyle(item)">
                 <span>{{ item.title }}</span>
-                <span v-if="item.dateFrom.length > 11" class="list-time">{{ item.dateFrom.substr(11) }}</span>
+                <span v-if="!item.fullDay" class="list-time">{{ item.timeFrom }}</span>
             </div>
             <div :class="'list-notes' + (item.isTodo&&item.done?' strikethrough':'')">{{ item.notes }}</div>
             <div class="list-notes" v-if="showDate && item.date != 'unassigned'">{{ hover ? item.dateFrom : dateAgo(item.dateFrom)  }}</div>

@@ -5,15 +5,37 @@
             <q-toolbar>
                 <q-btn dense flat round :icon="menu ? 'chevron_left' : 'chevron_right'" @click="menu = !menu" />
 
-                <q-tabs>
+                <q-tabs v-if="$q.screen.gt.sm">
                     <q-route-tab label="Schedule" to="/" exact />
                     <q-route-tab label="Calendar" to="/calendar" exact />
                     <q-route-tab label="Deadlines" to="/deadlines" exact />
                 </q-tabs>
+                <q-btn-dropdown v-else flat :label="$route.name">
+                    <q-list>
+                        <q-item clickable v-close-popup to="/" exact>
+                            <q-item-section>
+                                <q-item-label>Schedule</q-item-label>
+                            </q-item-section>
+                        </q-item>
+                        <q-item clickable v-close-popup to="/calendar" exact>
+                            <q-item-section>
+                                <q-item-label>Calendar</q-item-label>
+                            </q-item-section>
+                        </q-item>
+                        <q-item clickable v-close-popup to="/deadlines" exact>
+                            <q-item-section>
+                                <q-item-label>Deadlines</q-item-label>
+                            </q-item-section>
+                        </q-item>
+                    </q-list>
+                </q-btn-dropdown>
 
                 <q-space />
 
-                <q-btn label="Create" icon="add" @click="newEventDialog = true" color="primary" flat />
+                <month-switcher v-show="$route.path == '/calendar'" />
+
+                <q-btn v-if="$q.screen.gt.xs" label="Create" icon="add" @click="newEventDialog = true" color="primary" flat />
+                <q-btn v-else icon="add" @click="newEventDialog = true" color="primary" round dense flat />
             </q-toolbar>
         </q-header>
 
@@ -101,6 +123,7 @@
 
 <script>
 import NewEvent from '../components/NewEvent.vue'
+import MonthSwitcher from '../components/MonthSwitcher.vue'
 import categoryUtil from '../util/category'
 const categoryColorPalette = [
     '#8e24aa', '#9e69af', '#b39edb', '#7886cb', '#3f51b5', '#4185f3', '#059be5', '#009688', '#0b8043', '#33b579', '#7db442', '#c0cb33', '#e4c441', '#f5bf24', '#f09300', '#ef6c00', '#f4501e', '#d50201', '#d81a60', '#ae1457',
@@ -111,7 +134,8 @@ const categoryColorPalette = [
 export default {
     name: 'MainLayout',
     components: {
-        NewEvent
+        NewEvent,
+        MonthSwitcher
     },
     data () {
         return {

@@ -253,6 +253,13 @@ export default {
                 this.monthLayout = this.helper.monthLayout()
                 this.sortList()
             }
+        },
+        currentMonth(val) {
+            if (val != '') {
+                this.helper.changeMonth(val)
+                this.monthLayout = this.helper.monthLayout()
+                this.sortList()
+            }
         }
     },
     computed: {
@@ -261,6 +268,9 @@ export default {
         },
         pageVisible() {
             return this.$store.state.layout.pageVisible
+        },
+        currentMonth() {
+            return this.$store.state.data.currentMonth
         }
     },
 }
