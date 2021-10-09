@@ -66,7 +66,7 @@
                                 {{ category.name }}
                             </q-item-section>
                             <q-item-section side>
-                                {{ category.total }}
+                                {{ categoryStats[category.id] }}
                             </q-item-section>
 
                             <q-menu touch-position context-menu>
@@ -159,6 +159,9 @@ export default {
     computed: {
         dataIteration() {
             return this.$store.state.data.iteration
+        },
+        categoryStats() {
+            return this.$store.state.data.categoryStats
         }
     },
     watch: {

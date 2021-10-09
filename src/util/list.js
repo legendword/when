@@ -115,13 +115,6 @@ const listUtil = {
     },
     deleteEvent: async (event) => {
         const db = await idb.data
-        if (event.category != null) {
-            let ct = await db.get('categories', event.category)
-            if (ct != undefined) {
-                ct.total -= 1
-                await db.put('categories', ct)
-            }
-        }
         return db.delete('events', event.id)
     },
     changeEventDone: async (event, val) => {
@@ -148,23 +141,6 @@ const listUtil = {
             ts.objectStore('maxOrder').put(maxOrder+1, newEvent.date)
             ts.objectStore('events').put(newEvent)
         }
-        
-        if (oldEvent.category != newEvent.category) { // perform category action
-            if (oldEvent.category != null) {
-                let oldCategory = await ts.objectStore('categories').get(oldEvent.category)
-                if (oldCategory != undefined) {
-                    oldCategory.total -= 1
-                    ts.objectStore('categories').put(oldCategory)
-                }
-            }
-            if (newEvent.category != null) {
-                let newCategory = await ts.objectStore('categories').get(newEvent.category)
-                if (newCategory != undefined) {
-                    newCategory.total += 1
-                    ts.objectStore('categories').put(newCategory)
-                } // if newCategory is undefined... then it is user mismanipulation
-            }
-        }
 
         return ts.done
     },
@@ -181,14 +157,10 @@ const listUtil = {
             date,
             order: maxOrder
         }
-        if (event.category != null) {
+        if (event.category != null) { // just to ensure category actually exists
             let ct = await ts.objectStore('categories').get(event.category)
             if (ct == undefined) {
                 res.category = null
-            }
-            else {
-                ct.total += 1
-                ts.objectStore('categories').put(ct)
             }
         }
         ts.objectStore('maxOrder').put(maxOrder+1, date)

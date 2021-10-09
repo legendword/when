@@ -110,7 +110,8 @@ export default {
                 currentIndex: null,
                 hover: null
             },
-            categoryHelper: new CategoryHelper()
+            categoryHelper: new CategoryHelper(),
+            categories: []
         }
     },
     methods: {
@@ -272,7 +273,10 @@ export default {
             this.pastDue = [];
             this.closeDays = [];
             this.days = [];
-            let multiDayEvents = [];
+            let categoryStats = {};
+            for (let i of this.categories) {
+                categoryStats[i.id] = 0;
+            }
             let d = moment();
             const dateNames = ['Today', 'Tomorrow'];
             for (let i=0;i<7;i++) {
@@ -338,6 +342,7 @@ export default {
                         }
                     }
                 }
+                if (i.category != null) categoryStats[i.category]++;
             }
             this.unassigned.sort((a, b) => {
                 return a.order - b.order
@@ -352,11 +357,12 @@ export default {
                     return a.order - b.order
                 });
             }
-
-            console.log(this.unassigned, this.pastDue, this.closeDays, this.days)
+            this.$store.commit('data/categoryStats', categoryStats);
+            // console.log(this.unassigned, this.pastDue, this.closeDays, this.days)
         },
         loadList() {
             categoryUtil.getAll().then(categories => {
+                this.categories = categories;
                 this.categoryHelper.setCategories(categories);
 
                 listUtil.getAllEvents().then(res => {

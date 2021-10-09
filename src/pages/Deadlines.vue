@@ -122,7 +122,8 @@ export default {
             showHistory: false,
             historyLoading: false,
             historyDeadlines: [],
-            categoryHelper: new CategoryHelper()
+            categoryHelper: new CategoryHelper(),
+            categories: null
         }
     },
     methods: {
@@ -197,19 +198,25 @@ export default {
         },
         loadDeadlines() {
             categoryUtil.getAll().then(categories => {
+                this.categories = categories
                 this.categoryHelper.setCategories(categories);
 
                 deadlinesUtil.getAllActive().then((res) => {
                     this.deadlines = res
                     let timeProgress = {}
                     let dueStr = {}
+                    let categoryStats = {};
+                    for (let i of this.categories) {
+                        categoryStats[i.id] = 0;
+                    }
                     for (let i of this.deadlines) {
                         timeProgress[i.id] = 0
                         dueStr[i.id] = ''
-                        // i.startDate = i.dateFrom + ' ' + i.timeFrom
+                        if (i.category != null) categoryStats[i.category]++;
                     }
                     this.timeProgress = timeProgress
                     this.dueStr = dueStr
+                    this.$store.commit('data/categoryStats', categoryStats);
                     this.updateTime()
                 }).catch(err => {
                     console.error(err)

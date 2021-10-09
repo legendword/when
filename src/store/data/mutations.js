@@ -7,3 +7,6 @@ export function categories (state, val) {
 export function changeMonth (state, val) {
     state.currentMonth = val
 }
+export function categoryStats (state, val) {
+    state.categoryStats = {...val}
+}

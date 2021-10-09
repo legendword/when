@@ -122,7 +122,8 @@ export default {
             editEventDialog: false,
             editEventObj: {},
             activeEvent: null,
-            categoryHelper: null
+            categoryHelper: null,
+            categories: null
         }
     },
     methods: {
@@ -175,6 +176,10 @@ export default {
         sortList() { //sort list content into days
             this.unassigned = [];
             this.days = {};
+            let categoryStats = {};
+            for (let i of this.categories) {
+                categoryStats[i.id] = 0;
+            }
             let multiDayEvents = [];
             for (let i of this.list) {
                 i.type = i.isTodo ? 'todo' : 'event'
@@ -193,6 +198,7 @@ export default {
                         multiDayEvents.push(i);
                     }
                 }
+                if (i.category != null) categoryStats[i.category]++;
             }
             // sort arrays by order
             this.unassigned.sort((a, b) => {
@@ -218,12 +224,13 @@ export default {
                     }
                 }
             }
-
+            this.$store.commit('data/categoryStats', categoryStats);
             //console.log(this.unassigned, this.days)
         },
         loadList() {
             // this.categoryHelper = new CategoryHelper(this.$store.state.data.categories);
             categoryUtil.getAll().then(categories => {
+                this.categories = categories
                 this.categoryHelper.setCategories(categories);
 
                 listUtil.getAllEvents().then(res => {
@@ -258,7 +265,7 @@ export default {
             if (val != '') {
                 this.helper.changeMonth(val)
                 this.monthLayout = this.helper.monthLayout()
-                this.sortList()
+                // this.sortList()
             }
         }
     },
