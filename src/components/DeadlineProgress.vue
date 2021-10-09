@@ -78,12 +78,21 @@ export default {
         handleClick(e) {
             if (this.completed) return
             this.updateValue(e.screenX)
+        },
+        resizeHandler() {
+            let { width } = this.$refs.container.getBoundingClientRect() 
+            this.progressPointer = this.value * width
+            this.timePointer = this.timeValue * width
         }
     },
     mounted() {
         let { width } = this.$refs.container.getBoundingClientRect() 
         this.progressPointer = this.value * width
         this.timePointer = this.timeValue * width
+        window.addEventListener('resize', this.resizeHandler)
+    },
+    beforeDestroy() {
+        window.removeEventListener('resize', this.resizeHandler)
     }
 }
 </script>
