@@ -2,7 +2,7 @@
     <div class="q-py-md q-px-xl">
         <div class="full-width" v-if="valueInitialized">
             <div class="q-mb-md">
-                <q-input autofocus v-model="value.title" hide-bottom-space placeholder="Title" ref="title" input-class="text-input" />
+                <q-input autofocus v-model="value.title" hide-bottom-space placeholder="Title" ref="title" input-class="text-input" :rules="[(val) => val.length > 0 || 'Title is required']" />
             </div>
             <div class="q-my-md">
                 <q-chip v-for="category in categories" :key="category.id" clickable :outline="value.category != category.id" :style="value.category != category.id ? {color: category.color} : {backgroundColor: category.color, color: textColor(category.color)}" @click="value.category = value.category == category.id ? null : category.id">
@@ -20,13 +20,13 @@
                             <q-icon name="schedule" :color="inFocus.date ? 'primary' : 'default'" size="20px" />
                         </div>
                         <div class="ne-input ne-date-wrapper">
-                            <date-input v-model="value.dateFrom" @focus="dateFocus('dateFrom')" @blur="dateBlur('dateFrom')" />
-                            <time-input v-if="!value.fullDay" v-model="value.timeFrom" @focus="dateFocus('timeFrom')" @blur="dateBlur('timeFrom')" @remove="removeTime" :removeBtn="true" />
+                            <date-input v-model="value.dateFrom" @focus="dateFocus('dateFrom')" @blur="dateBlur('dateFrom')" ref="event-dateFrom" />
+                            <time-input v-if="!value.fullDay" v-model="value.timeFrom" @focus="dateFocus('timeFrom')" @blur="dateBlur('timeFrom')" @remove="removeTime" :removeBtn="true" ref="event-timeFrom" />
 
                             <template v-if="value.dateTo != null">
                                 <div> to </div>
-                                <date-input v-model="value.dateTo" @focus="dateFocus('dateTo')" @blur="dateBlur('dateTo')" />
-                                <time-input v-if="!value.fullDay" v-model="value.timeTo" @focus="dateFocus('timeTo')" @blur="dateBlur('timeTo')" />
+                                <date-input v-model="value.dateTo" @focus="dateFocus('dateTo')" @blur="dateBlur('dateTo')" ref="event-dateTo" />
+                                <time-input v-if="!value.fullDay" v-model="value.timeTo" @focus="dateFocus('timeTo')" @blur="dateBlur('timeTo')" ref="event-timeTo" />
                             </template>
 
                             <q-btn v-if="value.fullDay" @click="addTime" label="Add Time" color="primary" flat dense />
@@ -49,8 +49,8 @@
                             <q-icon name="schedule" :color="inFocus.date ? 'primary' : 'default'" size="20px" />
                         </div>
                         <div class="ne-input ne-date-wrapper">
-                            <date-input v-model="value.dateFrom" @focus="dateFocus('dateFrom')" @blur="dateBlur('dateFrom')" />
-                            <time-input v-if="!value.fullDay" v-model="value.timeFrom" @focus="dateFocus('timeFrom')" @blur="dateBlur('timeFrom')" @remove="removeTime" :removeBtn="true" />
+                            <date-input v-model="value.dateFrom" @focus="dateFocus('dateFrom')" @blur="dateBlur('dateFrom')" ref="todo-dateFrom" />
+                            <time-input v-if="!value.fullDay" v-model="value.timeFrom" @focus="dateFocus('timeFrom')" @blur="dateBlur('timeFrom')" @remove="removeTime" :removeBtn="true" ref="todo-timeFrom" />
 
                             <q-btn v-if="value.fullDay" @click="addTime" label="Add Time" color="primary" flat dense />
                         </div>
@@ -80,6 +80,10 @@ import TimeInput from './TimeInput.vue'
 import listUtil from '../util/list'
 import { textColor } from '../util/color'
 import { nowStr, todayStr } from 'src/util/date'
+const validationRefs = {
+    event: ['title', 'event-dateFrom', 'event-dateTo', 'event-timeFrom', 'event-timeTo'],
+    todo: ['title', 'todo-dateFrom', 'todo-timeFrom']
+};
 export default {
     name: 'EditEvent',
     props: {
@@ -158,6 +162,11 @@ export default {
             if (!this.value.fullDay) this.value.timeTo = nowStr(60, 'minutes')
         },
         submit() {
+            for (let i of validationRefs[this.type]) {
+                if (this.$refs[i] != null && !this.$refs[i].validate()) {
+                    return;
+                }
+            }
             this.value.isTodo = this.type == 'todo'
             if (this.value.isTodo) {
                 this.value.dateTo = null

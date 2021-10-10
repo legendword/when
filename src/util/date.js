@@ -80,3 +80,9 @@ export const offsetDate = function(date, offset) {
 export const dateAgo = function(date) {
     return moment(date).fromNow()
 }
+export const validateDate = function(date) {
+    return moment(date, 'YYYY-MM-DD').isValid()
+}
+export const validateTime = function(time) {
+    return moment(time, 'HH:mm').isValid()
+}

@@ -2,7 +2,7 @@
     <div class="q-py-md q-px-xl">
         <div class="full-width">
             <div class="q-mb-md">
-                <q-input autofocus v-model="value.title" hide-bottom-space placeholder="Title" ref="title" input-class="text-input" />
+                <q-input autofocus v-model="value.title" hide-bottom-space placeholder="Title" ref="title" input-class="text-input" :rules="[(val) => val.length > 0 || 'Title is required']" />
             </div>
             <div class="q-my-md">
                 <q-chip v-for="category in categories" :key="category.id" clickable :outline="value.category != category.id" :style="value.category != category.id ? {color: category.color} : {backgroundColor: category.color, color: textColor(category.color)}" @click="value.category = value.category == category.id ? null : category.id">
@@ -15,8 +15,8 @@
                 </div>
                 <div class="ne-input ne-date-wrapper">
                     <div style="width: 50px;">Starts </div>
-                    <date-input v-model="value.dateFrom" @focus="dateFocus('dateFrom')" @blur="dateBlur('dateFrom')" />
-                    <time-input v-model="value.timeFrom" @focus="dateFocus('timeFrom')" @blur="dateBlur('timeFrom')" />
+                    <date-input v-model="value.dateFrom" @focus="dateFocus('dateFrom')" @blur="dateBlur('dateFrom')" ref="deadline-dateFrom" />
+                    <time-input v-model="value.timeFrom" @focus="dateFocus('timeFrom')" @blur="dateBlur('timeFrom')" ref="deadline-timeFrom" />
                 </div>
             </div>
             <div class="ne-row">
@@ -25,8 +25,8 @@
                 </div>
                 <div class="ne-input ne-date-wrapper">
                     <div style="width: 50px;">Due </div>
-                    <date-input v-model="value.dateTo" @focus="dateFocus('dateTo')" @blur="dateBlur('dateTo')" />
-                    <time-input v-model="value.timeTo" @focus="dateFocus('timeTo')" @blur="dateBlur('timeTo')" />
+                    <date-input v-model="value.dateTo" @focus="dateFocus('dateTo')" @blur="dateBlur('dateTo')" ref="deadline-dateTo" />
+                    <time-input v-model="value.timeTo" @focus="dateFocus('timeTo')" @blur="dateBlur('timeTo')" ref="deadline-timeTo" />
                 </div>
             </div>
             <div class="q-mt-lg q-mb-md">
@@ -44,6 +44,9 @@ import moment from 'moment'
 import deadlinesUtil from '../util/deadlines'
 import { textColor } from '../util/color'
 import { nowStr, todayStr, tomorrowStr } from 'src/util/date'
+const validationRefs = {
+    deadline: ['title', 'deadline-dateFrom', 'deadline-dateTo', 'deadline-timeFrom', 'deadline-timeTo']
+};
 export default {
     name: 'EditDeadline',
     props: {
@@ -90,7 +93,11 @@ export default {
             if (this.currentActive == val) this.inFocus.date = false
         },
         submit() {
-            // #todo date validation
+            for (let i of validationRefs.deadline) {
+                if (this.$refs[i] != null && !this.$refs[i].validate()) {
+                    return;
+                }
+            }
             let submitValue = {
                 ...this.value,
                 startDate: this.value.dateFrom + ' ' + this.value.timeFrom,

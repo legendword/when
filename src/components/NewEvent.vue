@@ -2,7 +2,7 @@
     <div class="q-py-lg q-px-xl">
         <div class="full-width">
             <div class="q-mb-md">
-                <q-input autofocus v-model="universalValue.title" hide-bottom-space placeholder="Title" ref="title" input-class="text-input" />
+                <q-input autofocus v-model="universalValue.title" hide-bottom-space placeholder="Title" ref="title" input-class="text-input" :rules="[(val) => val.length > 0 || 'Title is required']" />
             </div>
             <div class="q-my-md">
                 <q-chip v-for="category in categories" :key="category.id" clickable :outline="universalValue.category != category.id" :style="universalValue.category != category.id ? {color: category.color} : {backgroundColor: category.color, color: textColor(category.color)}" @click="universalValue.category = universalValue.category == category.id ? null : category.id">
@@ -21,13 +21,13 @@
                             <q-icon name="schedule" :color="inFocus.date ? 'primary' : 'default'" size="20px" />
                         </div>
                         <div class="ne-input ne-date-wrapper">
-                            <date-input v-model="value.dateFrom" @focus="dateFocus('dateFrom')" @blur="dateBlur('dateFrom')" />
-                            <time-input v-if="!value.fullDay" v-model="value.timeFrom" @focus="dateFocus('timeFrom')" @blur="dateBlur('timeFrom')" @remove="removeTime" :removeBtn="true" />
+                            <date-input v-model="value.dateFrom" @focus="dateFocus('dateFrom')" @blur="dateBlur('dateFrom')" ref="event-dateFrom" />
+                            <time-input v-if="!value.fullDay" v-model="value.timeFrom" @focus="dateFocus('timeFrom')" @blur="dateBlur('timeFrom')" @remove="removeTime" :removeBtn="true" ref="event-timeFrom" />
 
                             <template v-if="value.dateTo != null">
                                 <div> to </div>
-                                <date-input v-model="value.dateTo" @focus="dateFocus('dateTo')" @blur="dateBlur('dateTo')" />
-                                <time-input v-if="!value.fullDay" v-model="value.timeTo" @focus="dateFocus('timeTo')" @blur="dateBlur('timeTo')" />
+                                <date-input v-model="value.dateTo" @focus="dateFocus('dateTo')" @blur="dateBlur('dateTo')" ref="event-daeTo" />
+                                <time-input v-if="!value.fullDay" v-model="value.timeTo" @focus="dateFocus('timeTo')" @blur="dateBlur('timeTo')" ref="event-timeTo" />
                             </template>
 
                             <q-btn v-if="value.fullDay" @click="addTime" label="Add Time" color="primary" flat dense />
@@ -50,8 +50,8 @@
                             <q-icon name="schedule" :color="inFocus.date ? 'primary' : 'default'" size="20px" />
                         </div>
                         <div class="ne-input ne-date-wrapper">
-                            <date-input v-model="value.dateFrom" @focus="dateFocus('dateFrom')" @blur="dateBlur('dateFrom')" />
-                            <time-input v-if="!value.fullDay" v-model="value.timeFrom" @focus="dateFocus('timeFrom')" @blur="dateBlur('timeFrom')" @remove="removeTime" :removeBtn="true" />
+                            <date-input v-model="value.dateFrom" @focus="dateFocus('dateFrom')" @blur="dateBlur('dateFrom')" ref="todo-dateFrom" />
+                            <time-input v-if="!value.fullDay" v-model="value.timeFrom" @focus="dateFocus('timeFrom')" @blur="dateBlur('timeFrom')" @remove="removeTime" :removeBtn="true" ref="todo-timeFrom" />
 
                             <q-btn v-if="value.fullDay" @click="addTime" label="Add Time" color="primary" flat dense />
                         </div>
@@ -72,8 +72,8 @@
                         </div>
                         <div class="ne-input ne-date-wrapper">
                             <div style="width: 50px;">Starts </div>
-                            <date-input v-model="deadlineValue.dateFrom" @focus="dateFocus('dateFrom')" @blur="dateBlur('dateFrom')" />
-                            <time-input v-model="deadlineValue.timeFrom" @focus="dateFocus('timeFrom')" @blur="dateBlur('timeFrom')" />
+                            <date-input v-model="deadlineValue.dateFrom" @focus="dateFocus('dateFrom')" @blur="dateBlur('dateFrom')" ref="deadline-dateFrom" />
+                            <time-input v-model="deadlineValue.timeFrom" @focus="dateFocus('timeFrom')" @blur="dateBlur('timeFrom')" ref="deadline-timeFrom" />
                         </div>
                     </div>
                     <div class="ne-row">
@@ -82,8 +82,8 @@
                         </div>
                         <div class="ne-input ne-date-wrapper">
                             <div style="width: 50px;">Due </div>
-                            <date-input v-model="deadlineValue.dateTo" @focus="dateFocus('dateTo')" @blur="dateBlur('dateTo')" />
-                            <time-input v-model="deadlineValue.timeTo" @focus="dateFocus('timeTo')" @blur="dateBlur('timeTo')" />
+                            <date-input v-model="deadlineValue.dateTo" @focus="dateFocus('dateTo')" @blur="dateBlur('dateTo')" ref="deadline-dateTo" />
+                            <time-input v-model="deadlineValue.timeTo" @focus="dateFocus('timeTo')" @blur="dateBlur('timeTo')" ref="deadline-timeTo" />
                         </div>
                     </div>
                 </q-tab-panel>
@@ -104,6 +104,11 @@ import TimeInput from './TimeInput.vue'
 import listUtil from '../util/list'
 import { textColor } from '../util/color'
 import deadlinesUtil from 'src/util/deadlines'
+const validationRefs = {
+    event: ['title', 'event-dateFrom', 'event-dateTo', 'event-timeFrom', 'event-timeTo'],
+    todo: ['title', 'todo-dateFrom', 'todo-timeFrom'],
+    deadline: ['title', 'deadline-dateFrom', 'deadline-dateTo', 'deadline-timeFrom', 'deadline-timeTo']
+}
 export default {
     name: 'NewEvent',
     props: {
@@ -194,6 +199,11 @@ export default {
             if (!this.value.fullDay) this.value.timeTo = nowStr(60, 'minutes')
         },
         submit() {
+            for (let i of validationRefs[this.type]) {
+                if (this.$refs[i] != null && !this.$refs[i].validate()) {
+                    return;
+                }
+            }
             for (let i in this.universalValue) {
                 this.value[i] = this.universalValue[i];
                 this.deadlineValue[i] = this.universalValue[i];
