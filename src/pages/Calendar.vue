@@ -13,79 +13,32 @@
                         <div v-else>{{ (day.date == 1 ? CalendarHelper.monthNameRef[day.month] + ' ' : '' ) + day.date }}</div>
                     </div>
                     <template v-if="days[day.fullDate] != null">
-                        <div :class="'calendar-event text-subtitle2' + (activeEvent == event.id ? ' shadow-5' : '')" v-for="event in days[day.fullDate]" :key="event.id" :title="event.title + (!event.fullDay ? (' ' + event.timeFrom) : '')" :style="categoryHelper.calendarItemStyle(event)">
-                            <div :class="'event-title ellipsis' + (event.isTodo ? ' todo' : '') + ((event.isTodo && event.done) ? ' strikethrough' : '')">{{ event.title }}</div>
-                            <div v-if="!event.fullDay" class="event-time text-grey-7">{{ event.timeFrom }}</div>
-
-                            <q-popup-proxy @before-show="activeEvent = event.id" @before-hide="activeEvent = null">
-                                <q-card style="min-width: 400px;">
-                                    <q-bar class="q-pl-md" :style="categoryHelper.itemBackgroundStyle(event)">
-                                        <div class="text-body2 text-weight-medium">{{ event.isTodo ? 'Todo' : 'Event' }}</div>
-                                        <q-space />
-                                        <q-btn @click="confirmRemoveEvent(event)" dense flat icon="delete" />
-                                        <q-btn @click="editEvent(event)" dense flat icon="edit" v-close-popup />
-                                        <q-btn dense flat icon="close" v-close-popup />
-                                    </q-bar>
-                                    <q-card-section>
-                                        <div class="text-h6 calendar-popup-title">
-                                            <div>{{ event.title }}</div>
-                                            <div>
-                                                <q-chip v-if="event.category != null" :style="categoryHelper.itemBackgroundStyle(event)">{{ categoryHelper.categoryName[event.category] }}</q-chip>
-                                            </div>
-                                        </div>
-                                        <template v-if="event.dateTo && event.dateTo != event.dateFrom"> <!-- multi-day events -->
-                                            <div class="text-body2">
-                                                <span style="display: inline-block; width: 42px;">From </span>
-                                                <span>{{ humanWeekDate(event.dateFrom) }}</span>
-                                                <span v-if="!event.fullDay" class="text-grey-7"> {{ event.timeFrom }}</span>
-                                            </div>
-                                            <div class="text-body2">
-                                                <span style="display: inline-block; width: 42px;">To </span>
-                                                <span>{{ humanWeekDate(event.dateTo) }}</span>
-                                                <span v-if="!event.fullDay" class="text-grey-7"> {{ event.timeTo }}</span>
-                                            </div>
-                                        </template>
-                                        <div class="text-body2" v-else>
-                                            <span>{{ humanWeekDate(event.dateFrom) }}</span>
-                                            <span v-if="!event.fullDay" class="text-grey-7"> {{ event.timeFrom }}</span>
-                                            <span v-if="!event.fullDay && event.dateTo" class="text-grey-7"> - {{ event.timeTo }}</span>
-                                        </div>
-                                        <div class="q-mt-md event-notes" v-if="event.notes.length > 0">{{ event.notes }}</div>
-                                    </q-card-section>
-                                    <q-separator />
-                                    <q-card-actions align="right" v-if="event.type == 'todo'">
-                                        <q-btn v-if="event.done" flat label="Mark Uncomplete" no-caps class="text-grey-7 text-subtitle2" @click="markAsDone(event, false)" />
-                                        <q-btn v-else flat label="Mark Completed" no-caps class="text-grey-7 text-subtitle2" @click="markAsDone(event, true)"  />
-                                    </q-card-actions>
-                                </q-card>
-                            </q-popup-proxy>
-
-                            <q-menu touch-position context-menu>
-                                <q-list dense style="min-width: 100px">
-                                    <q-item clickable v-close-popup @click="moveEvent(event, -1)">
-                                        <q-item-section>Move to Previous Day</q-item-section>
-                                    </q-item>
-                                    <q-item clickable v-close-popup @click="moveEvent(event, 1)">
-                                        <q-item-section>Move to Next Day</q-item-section>
-                                    </q-item>
-                                    <q-separator />
-                                    <q-item clickable v-close-popup @click="reOrderEvent(event, -1)">
-                                        <q-item-section>Move Up</q-item-section>
-                                    </q-item>
-                                    <q-item clickable v-close-popup @click="reOrderEvent(event, 1)">
-                                        <q-item-section>Move Down</q-item-section>
-                                    </q-item>
-                                    <q-separator />
-                                    <q-item clickable v-close-popup @click="editEvent(event)">
-                                        <q-item-section class="text-primary">Edit Event</q-item-section>
-                                    </q-item>
-                                    <q-item clickable v-close-popup @click="removeEvent(event)">
-                                        <q-item-section class="text-negative">Delete Event</q-item-section>
-                                    </q-item>
-                                </q-list>
-                            </q-menu>
-                        </div>
+                        <template v-if="days[day.fullDate].length > maxEventsPerDay">
+                            <template v-for="(item, itemInd) in days[day.fullDate]">
+                                <calendar-event v-if="itemInd < maxEventsPerDay - 1" :key="item.id" :event="item" :categoryHelper="categoryHelper" :active="activeEvent == item.id" @edit="editEvent(item)" @remove="removeEvent(item)" @move="moveEvent(item, $event)" @reorder="reOrderEvent(item, $event)" @confirmRemove="confirmRemoveEvent(item)" @done="markAsDone(item, $event)" @setActive="activeEvent = item.id" @removeActive="activeEvent = null" />
+                            </template>
+                            <div class="calendar-event text-subtitle2" @click="expandDay = day.fullDate">
+                                <div class="event-title">{{ days[day.fullDate].length - maxEventsPerDay + 1 }} more</div>
+                            </div>
+                        </template>
+                        <template v-else>
+                            <calendar-event v-for="item in days[day.fullDate]" :key="item.id" :event="item" :categoryHelper="categoryHelper" :active="activeEvent == item.id" @edit="editEvent(item)" @remove="removeEvent(item)" @move="moveEvent(item, $event)" @reorder="reOrderEvent(item, $event)" @confirmRemove="confirmRemoveEvent(item)" @done="markAsDone(item, $event)" @setActive="activeEvent = item.id" @removeActive="activeEvent = null" />
+                        </template>
                     </template>
+
+                    <q-menu v-if="days[day.fullDate] && days[day.fullDate].length > maxEventsPerDay" anchor="center middle" self="center middle" no-parent-event :value="expandDay == day.fullDate" @input="expandDayInput($event, day.fullDate)">
+                        <q-card>
+                            <q-card-section class="q-pa-sm">
+                                <div class="calendar-date text-center text-subtitle2 text-grey-7">
+                                    <div v-if="day.fullDate == helper.today" class="today">{{ day.date }}</div>
+                                    <div v-else>{{ (day.date == 1 ? CalendarHelper.monthNameRef[day.month] + ' ' : '' ) + day.date }}</div>
+                                </div>
+                                <div class="q-my-sm">
+                                    <calendar-event v-for="item in days[day.fullDate]" :key="item.id" :event="item" :categoryHelper="categoryHelper" :active="activeEvent == item.id" @edit="editEvent(item)" @remove="removeEvent(item)" @move="moveEvent(item, $event)" @reorder="reOrderEvent(item, $event)" @confirmRemove="confirmRemoveEvent(item)" @done="markAsDone(item, $event)" @setActive="activeEvent = item.id" @removeActive="activeEvent = null" />
+                                </div>
+                            </q-card-section>
+                        </q-card>
+                    </q-menu>
                 </div>
             </div>
         </div>
@@ -100,7 +53,8 @@
 <script>
 import listUtil from '../util/list'
 import CalendarHelper from '../util/CalendarHelper'
-import { humanWeekDate, offsetDate, thisMonth } from 'src/util/date'
+import { humanWeekDate, thisMonth } from 'src/util/date'
+import CalendarEvent from 'src/components/CalendarEvent.vue'
 import EditEvent from '../components/EditEvent.vue'
 import moment from 'moment'
 import CategoryHelper from '../util/CategoryHelper'
@@ -108,7 +62,8 @@ import categoryUtil from 'src/util/category'
 export default {
     name: 'Calendar',
     components: {
-        EditEvent
+        EditEvent,
+        CalendarEvent
     },
     data() {
         return {
@@ -123,10 +78,19 @@ export default {
             editEventObj: {},
             activeEvent: null,
             categoryHelper: null,
-            categories: null
+            categories: null,
+            screenSize: {
+                width: window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth,
+                height: window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+            },
+            expandDay: null
         }
     },
     methods: {
+        expandDayInput(val, date) {
+            // console.log('expandDayInput', val, date)
+            this.expandDay = val ? date : null
+        },
         markAsDone(evt, isDone) {
             listUtil.changeEventDone(evt, isDone).then(() => {
                 evt.done = isDone
@@ -172,6 +136,10 @@ export default {
             }).onOk(() => {
                 this.removeEvent(evt)
             })
+        },
+        resizeHandler() {
+            this.screenSize.width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+            this.screenSize.height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
         },
         sortList() { //sort list content into days
             this.unassigned = [];
@@ -236,6 +204,7 @@ export default {
                 listUtil.getAllEvents().then(res => {
                     this.list = res
                     this.sortList()
+                    console.log(this.maxEventsPerDay)
                 }).catch(err => {
                     console.error('getAllEvents error: ', err)
                 })
@@ -249,7 +218,12 @@ export default {
         this.monthLayout = this.helper.monthLayout()
         this.categoryHelper = new CategoryHelper()
         this.$store.commit('data/changeMonth', thisMonth())
+        // this.resizeHandler()
+        window.addEventListener('resize', this.resizeHandler)
         this.loadList()
+    },
+    beforeDestroy() {
+        window.removeEventListener('resize', this.resizeHandler)
     },
     watch: {
         dataIteration() {
@@ -270,6 +244,10 @@ export default {
         }
     },
     computed: {
+        maxEventsPerDay() {
+            // layout header: 50px, week header: 36px, date and event: 22px
+            return Math.floor((((this.screenSize.height - 86) / this.monthLayout.length) / 22) - 1)
+        },
         dataIteration() {
             return this.$store.state.data.iteration
         },
@@ -324,6 +302,7 @@ export default {
         .calendar-day {
             flex: 1;
             border-top: $border 1px solid;
+            width: 14.29%; /* 100% / 7 */
         }
     }
 }
@@ -346,13 +325,6 @@ export default {
         background-color: $primary;
         color: #ffffff;
     }
-}
-
-.calendar-popup-title {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
 }
 
 .calendar-event {
