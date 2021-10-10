@@ -111,6 +111,8 @@ export default {
     },
     data() {
         return {
+            deadlinesRes: [],
+            historyDeadlinesRes: [],
             deadlines: [],
             timer: null,
             timeProgress: {},
@@ -127,15 +129,6 @@ export default {
         }
     },
     methods: {
-        loadHistoryDeadlines() {
-            deadlinesUtil.getAllInactive().then(res => {
-                this.historyDeadlines = res.reverse()
-                this.historyLoading = false
-                this.showHistory = true
-            }).catch(err => {
-                console.error(err)
-            })
-        },
         viewHistory() {
             this.historyLoading = true
             this.loadHistoryDeadlines()
@@ -196,28 +189,54 @@ export default {
             this.loadDeadlines()
             this.addDialog = false
         },
+        sortHistoryDeadlines() {
+            if (this.categoryFilter === null) {
+                this.historyDeadlines = this.historyDeadlinesRes
+                return
+            }
+            this.historyDeadlines = [];
+            for (let i of this.historyDeadlinesRes) {
+                if (i.category != this.categoryFilter) continue;
+                this.historyDeadlines.push(i);
+            }
+        },
+        loadHistoryDeadlines() {
+            deadlinesUtil.getAllInactive().then(res => {
+                this.historyDeadlinesRes = res.reverse()
+                this.historyLoading = false
+                this.showHistory = true
+            }).catch(err => {
+                console.error(err)
+            })
+        },
+        sortDeadlines() {
+            let timeProgress = {}
+            let dueStr = {}
+            let categoryStats = {};
+            this.deadlines = [];
+            for (let i of this.categories) {
+                categoryStats[i.id] = 0;
+            }
+            for (let i of this.deadlineRes) {
+                if (this.categoryFilter != null && this.categoryFilter != i.category) continue;
+                this.deadlines.push(i);
+                timeProgress[i.id] = 0
+                dueStr[i.id] = ''
+                if (i.category != null) categoryStats[i.category]++;
+            }
+            this.timeProgress = timeProgress
+            this.dueStr = dueStr
+            this.$store.commit('data/categoryStats', categoryStats);
+            this.updateTime()
+        },
         loadDeadlines() {
             categoryUtil.getAll().then(categories => {
                 this.categories = categories
                 this.categoryHelper.setCategories(categories);
 
                 deadlinesUtil.getAllActive().then((res) => {
-                    this.deadlines = res
-                    let timeProgress = {}
-                    let dueStr = {}
-                    let categoryStats = {};
-                    for (let i of this.categories) {
-                        categoryStats[i.id] = 0;
-                    }
-                    for (let i of this.deadlines) {
-                        timeProgress[i.id] = 0
-                        dueStr[i.id] = ''
-                        if (i.category != null) categoryStats[i.category]++;
-                    }
-                    this.timeProgress = timeProgress
-                    this.dueStr = dueStr
-                    this.$store.commit('data/categoryStats', categoryStats);
-                    this.updateTime()
+                    this.deadlineRes = res
+                    this.sortDeadlines()
                 }).catch(err => {
                     console.error(err)
                 })
@@ -237,6 +256,12 @@ export default {
             if (val) {
                 this.loadDeadlines()
             }
+        },
+        categoryFilter() {
+            this.sortDeadlines()
+            if (this.showHistory) {
+                this.sortHistoryDeadlines()
+            }
         }
     },
     computed: {
@@ -245,6 +270,9 @@ export default {
         },
         pageVisible() {
             return this.$store.state.layout.pageVisible
+        },
+        categoryFilter() {
+            return this.$store.state.layout.categoryFilter
         }
     },
     mounted() {

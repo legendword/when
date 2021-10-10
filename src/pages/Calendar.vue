@@ -141,7 +141,7 @@ export default {
             this.screenSize.width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
             this.screenSize.height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
         },
-        sortList() { //sort list content into days
+        sortList() {
             this.unassigned = [];
             this.days = {};
             let categoryStats = {};
@@ -151,6 +151,7 @@ export default {
             let multiDayEvents = [];
             for (let i of this.list) {
                 i.type = i.isTodo ? 'todo' : 'event'
+                if (this.categoryFilter != null && this.categoryFilter != i.category) continue;
                 if (i.date == 'unassigned') {
                     this.unassigned.push(i)
                 }
@@ -241,6 +242,9 @@ export default {
                 this.monthLayout = this.helper.monthLayout()
                 // this.sortList()
             }
+        },
+        categoryFilter() {
+            this.sortList()
         }
     },
     computed: {
@@ -256,6 +260,9 @@ export default {
         },
         currentMonth() {
             return this.$store.state.data.currentMonth
+        },
+        categoryFilter() {
+            return this.$store.state.layout.categoryFilter
         }
     },
 }

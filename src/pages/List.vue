@@ -289,6 +289,7 @@ export default {
             }
             for (let i of this.list) {
                 // if (i.isTodo && i.done) continue
+                if (this.categoryFilter != null && this.categoryFilter != i.category) continue;
                 if (i.date == 'unassigned') {
                     this.unassigned.push(i);
                 }
@@ -389,6 +390,9 @@ export default {
                 this.tomorrow = tomorrowStr()
                 this.sortList()
             }
+        },
+        categoryFilter() {
+            this.sortList()
         }
     },
     computed: {
@@ -397,6 +401,9 @@ export default {
         },
         pageVisible() {
             return this.$store.state.layout.pageVisible
+        },
+        categoryFilter() {
+            return this.$store.state.layout.categoryFilter
         }
     },
     created() {

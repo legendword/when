@@ -61,7 +61,7 @@
                         </div>
                     </div>
                     <q-list dense padding class="menu-list" v-if="categories.length > 0">
-                        <q-item v-for="category in categories" :key="category.id" clickable v-ripple :style="{color: category.color}" class="text-weight-medium">
+                        <q-item v-for="category in categories" :key="category.id" clickable v-ripple :style="{color: category.color}" :class="'text-weight-medium' + ((categoryFilter != null && categoryFilter == category.id) ? ' shadow-5' : '')" @click="categoryClick(category.id)">
                             <q-item-section>
                                 {{ category.name }}
                             </q-item-section>
@@ -162,6 +162,9 @@ export default {
         },
         categoryStats() {
             return this.$store.state.data.categoryStats
+        },
+        categoryFilter() {
+            return this.$store.state.layout.categoryFilter
         }
     },
     watch: {
@@ -171,6 +174,9 @@ export default {
         }
     },
     methods: {
+        categoryClick(id) {
+            this.$store.commit('layout/filterCategory', this.categoryFilter === id ? null : id)
+        },
         editCategoryPopupChange(val) {
             if (!val) {
                 this.editCategory = {

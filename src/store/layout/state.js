@@ -1,5 +1,6 @@
 export default function() {
     return {
-        pageVisible: true
+        pageVisible: true,
+        categoryFilter: null
     }
 }
