@@ -25,7 +25,3 @@ _(*PWA support coming soon)_
 Join developers, (future) maintainers, and users on Discord to request features, resolve problems, and chat about everything!
 
 As this app is still in beta testing phase, feedback is very important and much appreciated!
-
-## About the developer
-
-[Legendword](https://legendword.com/): a first year Science student at UBC; programming as a hobby since 2014. Reach out to *Legendword#8581* on the Discord server to say hi!
