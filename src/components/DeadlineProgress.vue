@@ -77,7 +77,7 @@ export default {
         },
         handleClick(e) {
             if (this.completed) return
-            this.updateValue(e.screenX)
+            this.updateValue(e.clientX)
         },
         resizeHandler() {
             let { width } = this.$refs.container.getBoundingClientRect() 
