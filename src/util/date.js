@@ -1,4 +1,7 @@
 import moment from "moment"
+export const isBefore = function(time) {
+    return moment(time, 'YYYY-MM-DD HH:mm').isBefore()
+}
 export const calendarTime = function(time) {
     return moment(time, 'YYYY-MM-DD HH:mm').calendar({
         sameElse: 'YYYY-MM-DD'

@@ -34,7 +34,7 @@
                         </div>
                         <deadline-progress :value="ddl.progress" @input="progressChange(ind, $event)" :time-value="timeProgress[ddl.id]" :completed="ddl.completeDate != null" class="q-mx-md" />
                         <div class="q-pt-sm text-body2 row justify-between">
-                            <div class="q-pr-sm">Started {{calendarTime(ddl.startDate)}}</div>
+                            <div class="q-pr-sm">{{isBefore(ddl.startDate) ? 'Started' : 'Starts'}} {{calendarTime(ddl.startDate)}}</div>
                             <div v-if="ddl.completeDate != null" class="q-px-sm">Completed {{calendarTime(ddl.completeDate)}}</div>
                             <div class="q-pl-sm">Due {{calendarTime(ddl.dueDate)}}</div>
                         </div>
@@ -79,7 +79,7 @@
                         </div>
                         <deadline-progress :value="ddl.progress" :time-value="1" :completed="ddl.completeDate != null" class="q-mx-md" />
                         <div class="q-pt-sm text-body2 row justify-between">
-                            <div class="q-pr-sm">Started {{calendarTime(ddl.startDate)}}</div>
+                            <div class="q-pr-sm">{{isBefore(ddl.startDate) ? 'Started' : 'Starts'}} {{calendarTime(ddl.startDate)}}</div>
                             <div v-if="ddl.completeDate != null" class="q-px-sm">Completed {{calendarTime(ddl.completeDate)}}</div>
                             <div class="q-pl-sm">Due {{calendarTime(ddl.dueDate)}}</div>
                         </div>
@@ -97,7 +97,7 @@
 
 <script>
 import moment from 'moment'
-import { calendarTime } from '../util/date'
+import { calendarTime, isBefore } from '../util/date'
 import deadlinesUtil from '../util/deadlines'
 import DeadlineProgress from '../components/DeadlineProgress.vue'
 import EditDeadline from '../components/EditDeadline.vue'
@@ -121,6 +121,7 @@ export default {
             editddl: {},
             editIsHistory: false,
             calendarTime,
+            isBefore,
             showHistory: false,
             historyLoading: false,
             historyDeadlines: [],
@@ -168,7 +169,7 @@ export default {
                     return
                 }
                 let prog = cur.diff(start) / end.diff(start)
-                this.timeProgress[i.id] = prog
+                this.timeProgress[i.id] = Math.max(prog, 0)
                 this.dueStr[i.id] = cur.to(end)
             }
         },
