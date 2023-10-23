@@ -203,6 +203,7 @@ export default {
         loadHistoryDeadlines() {
             deadlinesUtil.getAllInactive().then(res => {
                 this.historyDeadlinesRes = res.reverse()
+                this.sortHistoryDeadlines()
                 this.historyLoading = false
                 this.showHistory = true
             }).catch(err => {
