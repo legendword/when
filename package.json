@@ -6,6 +6,7 @@
   "author": "Legendword <zwh@legendword.com>",
   "private": true,
   "scripts": {
+    "format": "prettier . --write",
     "test": "echo \"No test specified\" && exit 0"
   },
   "dependencies": {

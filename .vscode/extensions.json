@@ -1,7 +1,5 @@
 {
-  "recommendations": [
-    "octref.vetur"
-  ],
+  "recommendations": ["octref.vetur"],
   "unwantedRecommendations": [
     "hookyqr.beautify",
     "dbaeumer.jshint",

@@ -1,43 +1,46 @@
 // app global css in SCSS form
 
 // overwrite quasar field styles
-.time-input-wrapper, .date-input-wrapper, .category-input-wrapper {
-    .q-field__control:not(.q-textarea .q-field__control), .q-field__marginal {
-        height: 40px !important;
-    }
-    .q-field__append {
-        padding-left: 0 !important;
-    }
+.time-input-wrapper,
+.date-input-wrapper,
+.category-input-wrapper {
+  .q-field__control:not(.q-textarea .q-field__control),
+  .q-field__marginal {
+    height: 40px !important;
+  }
+  .q-field__append {
+    padding-left: 0 !important;
+  }
 }
 .list-checkbox {
-    .q-checkbox__inner {
-        color: inherit !important;
-    }
+  .q-checkbox__inner {
+    color: inherit !important;
+  }
 }
 
 // custom colors
 .text-transparent {
-    color: transparent !important;
+  color: transparent !important;
 }
 .text-event {
-    color: $primary;
+  color: $primary;
 }
 .bg-event {
-    background: $primary;
+  background: $primary;
 }
 .text-todo {
-    color: $secondary;
+  color: $secondary;
 }
 .bg-todo {
-    background: $secondary;
+  background: $secondary;
 }
 .text-deadline {
-    color: $deadline;
+  color: $deadline;
 }
 .bg-deadline {
-    background: $deadline;
+  background: $deadline;
 }
 
 .strikethrough {
-    text-decoration: line-through;
+  text-decoration: line-through;
 }

@@ -1,10 +1,10 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
+import Vue from "vue";
+import Vuex from "vuex";
 
-import layout from './layout'
-import data from './data'
+import layout from "./layout";
+import data from "./data";
 
-Vue.use(Vuex)
+Vue.use(Vuex);
 
 /*
  * If not building with SSR mode, you can
@@ -19,13 +19,13 @@ export default function (/* { ssrContext } */) {
   const Store = new Vuex.Store({
     modules: {
       layout,
-      data
+      data,
     },
 
     // enable strict mode (adds overhead!)
     // for dev mode only
-    strict: process.env.DEBUGGING
-  })
+    strict: process.env.DEBUGGING,
+  });
 
-  return Store
+  return Store;
 }
